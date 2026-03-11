@@ -4578,6 +4578,15 @@ function processAcledText(text, filename) {
   buildAcledMarkers(rows, fmt);
   setAcledDot('ok');
   document.getElementById('acled-count').textContent = rows.length.toLocaleString();
+  // Enable layer + toggle
+  if (!acledLayerOn) {
+    acledLayerOn = true;
+    acledMarkers.addTo(map);
+    const btn = document.getElementById('btn-acled');
+    const sw  = document.getElementById('db-layer-switch');
+    if (btn) btn.classList.add('active');
+    if (sw)  sw.classList.add('on');
+  }
 
   const dateCol = hasAcled ? 'event_date' : 'date_start';
   const dates = rows
@@ -4793,19 +4802,20 @@ function buildAcledMarkers(rows, fmt) {
   // Set min/max dates from loaded data
   const validDates = dbAllEvents.map(e => e._date).filter(Boolean);
   if (validDates.length) {
-    dbMinDate = new Date(Math.min(...validDates));
-    dbMaxDate = new Date(Math.max(...validDates));
+    dbMinDate  = new Date(Math.min(...validDates));
+    dbMaxDate  = new Date(Math.max(...validDates));
     dbFromYear = dbMinDate.getFullYear();
     dbToYear   = dbMaxDate.getFullYear();
     syncYearInputs();
-  }
-
-  // Add layer to map if active
-  if (acledLayerOn) {
-    acledMarkers.addTo(map);
+  } else {
+    dbFromYear = null;
+    dbToYear   = null;
   }
 
   updateDbCounts();
+
+  // Rebuild visible markers with current filters (date range etc.)
+  rebuildVisibleMarkers();
 }
 
 function toggleAcledLayer() {
@@ -4857,7 +4867,7 @@ setInterval(fetchNews, 5 * 60 * 1000);
 // Detect best proxy in background for future requests
 detectFastestProxy();
 
-setTimeout(restoreAcledFromStorage, 800);
+// restoreAcledFromStorage handled after data.json attempt
 
 // Auto-load data.json if present next to index.html (Netlify deploy)
 fetch('./data.json')
@@ -4875,6 +4885,7 @@ fetch('./data.json')
     buildAcledMarkers(normalized, fmt);
     setAcledDot('ok');
     acledLoaded = true;
+    localStorage.removeItem('acled_csv'); // data.json takes priority over cached CSV
     // Auto-enable layer when data.json loads
     if (!acledLayerOn) {
       acledLayerOn = true;
@@ -4901,7 +4912,7 @@ fetch('./data.json')
     );
     // histPanel no longer auto-opens
   })
-  .catch(() => {}); // silent if no data.json
+  .catch(() => { restoreAcledFromStorage(); }); // fallback to localStorage only if no data.json
 
 let satPanelOpen = false;
 
