@@ -342,7 +342,6 @@
   }
   .cat-tabs::-webkit-scrollbar { display:none; }
 
-
   .time-tabs {
     display: flex; gap: 4px; padding: 4px 10px 6px;
     border-bottom: 0.5px solid var(--border2);
@@ -1448,7 +1447,6 @@ const GDELT_RSS_FEEDS = [
   { url: 'https://api.gdeltproject.org/api/v2/doc/doc?query=Myanmar+civilian+killed+OR+bombing&mode=artlist&maxrecords=15&sort=DateDesc&format=rss', label: 'GDELT Civilians' },
 ];
 
-
 async function fetchGdelt() {
   const allItems = [];
   const seenUrls = new Set();
@@ -1513,7 +1511,6 @@ async function detectFastestProxy() {
   );
   const winner = results.find(r => r.status === 'fulfilled');
   _bestProxy = winner ? CORS_PROXIES[winner.value] : CORS_PROXIES[0];
-  console.log('[Proxy] fastest:', _bestProxy);
 }
 
 const _fetchCache = new Map(); // url → { data, ts }
@@ -1580,8 +1577,6 @@ const map = L.map('map', {
   maxBounds: [[9.0, 87.0], [29.5, 106.0]],
   maxBoundsViscosity: 0.95,
 });
-
-
 
 L.control.scale({ position: 'bottomright', imperial: false, maxWidth: 120 }).addTo(map);
 
@@ -1694,7 +1689,6 @@ const MYANMAR_BORDER_FALLBACK = [
   [26.5,96.0],[26.8,96.2],[27.0,96.5],[27.3,96.8],[27.5,97.0],
   [27.8,97.2],[28.0,97.0],[28.32,97.32]
 ];
-
 
 // ── Neighboring countries — light borders + labels ──
 // ── Neighboring countries — full GeoJSON outlines + labels ──
@@ -3452,10 +3446,16 @@ function toggleCities() {
   }
 }
 
+// Pre-compute lowercase names once
+let _locNamesLower = null;
+function _getLocNamesLower() {
+  if (!_locNamesLower) _locNamesLower = MYANMAR_LOCATIONS.map(l => ({ name: l.name, lower: l.name.toLowerCase() }));
+  return _locNamesLower;
+}
 function detectLocation(text) {
   const t = (text || '').toLowerCase();
-  for (const loc of MYANMAR_LOCATIONS) {
-    if (t.includes(loc.name.toLowerCase())) return loc.name;
+  for (const loc of _getLocNamesLower()) {
+    if (t.includes(loc.lower)) return loc.name;
   }
   const map2loc = {
     'rakhine':'Rakhine State','arakan':'Rakhine State',
@@ -4064,15 +4064,17 @@ const CAT_KEYWORDS = {
   humanitarian:['refugee','displaced','IDP','aid','relief','humanitarian','food','water','shelter','medicine','hospital','health','NGO','UNHCR','WFP','Red Cross','flood','disaster','famine','malnutrition','education','school','children','women','rights','victim','civilian','exodus'],
 };
 
+// Cache article category to avoid recomputing on every render
+const _catEntries = Object.entries(CAT_KEYWORDS);
 function detectCategory(article) {
+  if (article._cat) return article._cat;
   const text = ((article.title||'') + ' ' + (article.description||'')).toLowerCase();
-  for (const [cat, kws] of Object.entries(CAT_KEYWORDS)) {
-    if (kws.some(kw => text.includes(kw))) return cat;
+  for (const [cat, kws] of _catEntries) {
+    if (kws.some(kw => text.includes(kw))) { article._cat = cat; return cat; }
   }
+  article._cat = 'general';
   return 'general';
 }
-
-
 
 function setCategory(cat) {
   activeCategory = cat;
@@ -4103,7 +4105,6 @@ function getFilteredArticles() {
   let result = activeCategory === 'general' ? articles : articles.filter(a => detectCategory(a) === activeCategory);
   return applyTimeFilter(result);
 }
-
 
 function toggleBriefingPanel() {
   const p = document.getElementById('briefing-panel'), b = document.getElementById('briefing-btn');
@@ -4624,7 +4625,6 @@ function loadAcledCSV(input) {
         localStorage.setItem('acled_filename', file.name);
         localStorage.setItem('acled_saved_at', new Date().toISOString());
       } catch(storageErr) {
-        console.warn('localStorage quota exceeded — file too large to cache:', storageErr);
       }
 
       processAcledText(text, file.name);
@@ -4653,7 +4653,6 @@ function restoreAcledFromStorage() {
       `${filename}<br><span style="color:var(--text3);font-size:0.6rem;">Cached ${age} ago · <a href="#" onclick="clearAcledStorage();return false;" style="color:var(--red);">Clear cache</a></span>`
     );
   } catch(err) {
-    console.warn('Could not restore ACLED from storage:', err);
     localStorage.removeItem('acled_csv');
   }
 }
@@ -4790,6 +4789,22 @@ function buildAcledMarkers(rows, fmt) {
 
   const allToggle = document.getElementById('db-all-toggle');
   if (allToggle) allToggle.classList.add('on');
+
+  // Set min/max dates from loaded data
+  const validDates = dbAllEvents.map(e => e._date).filter(Boolean);
+  if (validDates.length) {
+    dbMinDate = new Date(Math.min(...validDates));
+    dbMaxDate = new Date(Math.max(...validDates));
+    dbFromYear = dbMinDate.getFullYear();
+    dbToYear   = dbMaxDate.getFullYear();
+    syncYearInputs();
+  }
+
+  // Add layer to map if active
+  if (acledLayerOn) {
+    acledMarkers.addTo(map);
+  }
+
   updateDbCounts();
 }
 
@@ -4860,6 +4875,15 @@ fetch('./data.json')
     buildAcledMarkers(normalized, fmt);
     setAcledDot('ok');
     acledLoaded = true;
+    // Auto-enable layer when data.json loads
+    if (!acledLayerOn) {
+      acledLayerOn = true;
+      acledMarkers.addTo(map);
+      const btn = document.getElementById('btn-acled');
+      const sw  = document.getElementById('db-layer-switch');
+      if (btn) btn.classList.add('active');
+      if (sw)  sw.classList.add('on');
+    }
     document.getElementById('acled-count').textContent = normalized.length.toLocaleString();
     const dbControls = document.getElementById('db-controls');
     const dbBadge    = document.getElementById('db-loaded-badge');
@@ -5506,7 +5530,6 @@ function toggleAirstrikes() {
   if (btn) btn.classList.toggle('active', airstrikesVisible);
   renderAirstrikes();
 }
-
 
 function toggleCtrlPanel() {
   const panel = document.getElementById('map-controls');
