@@ -920,7 +920,7 @@
                        border-radius:6px;color:var(--text);padding:4px 6px;font-family:inherit;
                        font-size:0.68rem;outline:none;text-align:center;-moz-appearance:textfield;"
                 onfocus="this.style.borderColor='var(--accent)'"
-                onblur="this.style.borderColor='var(--border2)';setDbYearRange()"
+                onblur="this.style.borderColor='var(--border2)'"
                 onkeydown="if(event.key==='Enter')setDbYearRange()" />
               <span style="font-size:0.6rem;color:var(--text3);flex-shrink:0;">→</span>
               <input id="db-year-to" type="number" placeholder="To"
@@ -928,21 +928,16 @@
                        border-radius:6px;color:var(--text);padding:4px 6px;font-family:inherit;
                        font-size:0.68rem;outline:none;text-align:center;-moz-appearance:textfield;"
                 onfocus="this.style.borderColor='var(--accent)'"
-                onblur="this.style.borderColor='var(--border2)';setDbYearRange()"
+                onblur="this.style.borderColor='var(--border2)'"
                 onkeydown="if(event.key==='Enter')setDbYearRange()" />
-              <button onclick="setDbAllYears()" title="Show all years"
-                style="background:rgba(154,154,154,0.12);border:0.5px solid rgba(154,154,154,0.3);
-                       border-radius:6px;color:var(--accent);padding:4px 7px;font-family:inherit;
-                       font-size:0.62rem;font-weight:600;cursor:pointer;flex-shrink:0;
-                       transition:all 0.12s;"
-                onmouseover="this.style.background='rgba(154,154,154,0.25)'"
-                onmouseout="this.style.background='rgba(154,154,154,0.12)'">All</button>
-              <button onclick="resetDbYears()" title="Reset to full dataset range"
-                style="background:var(--surface);border:0.5px solid var(--border2);
+              <button onclick="setDbAllYears()" title="All years"
+                style="background:rgba(154,154,154,0.1);border:0.5px solid rgba(154,154,154,0.25);
                        border-radius:6px;color:var(--text3);padding:4px 7px;font-family:inherit;
-                       font-size:0.62rem;cursor:pointer;flex-shrink:0;transition:all 0.12s;"
-                onmouseover="this.style.borderColor='var(--border2)';this.style.color='var(--text)'"
-                onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text3)'">↺</button>
+                       font-size:0.62rem;cursor:pointer;flex-shrink:0;transition:all 0.12s;">All</button>
+              <button onclick="setDbYearRange()" id="db-year-confirm"
+                style="background:rgba(255,159,10,0.15);border:0.5px solid var(--accent);
+                       border-radius:6px;color:var(--accent);padding:4px 10px;font-family:inherit;
+                       font-size:0.62rem;font-weight:600;cursor:pointer;flex-shrink:0;transition:all 0.12s;">OK</button>
             </div>
             <div id="db-date-range-display" style="font-size:0.58rem;color:var(--text3);margin-top:2px;"></div>
           </div>
@@ -959,10 +954,16 @@
           </div>
 
           <!-- Show on map + clear -->
-          <div class="layer-toggle-row" onclick="toggleAcledLayer()">
-            <span class="layer-toggle-label" data-i18n="hist_show_map">Show on map</span>
-            <div class="toggle-switch" id="db-layer-switch"></div>
-          </div>
+          <button id="db-show-map-btn" onclick="toggleAcledLayer()"
+            style="width:100%;display:flex;align-items:center;justify-content:center;gap:7px;
+                   background:rgba(154,154,154,0.08);border:0.5px solid var(--border2);
+                   border-radius:8px;color:var(--text3);padding:8px 12px;font-family:inherit;
+                   font-size:0.72rem;font-weight:600;cursor:pointer;transition:all 0.2s;
+                   letter-spacing:0.03em;">
+            <span>🗺</span>
+            <span data-i18n="hist_show_map">Show on map</span>
+            <div class="toggle-switch" id="db-layer-switch" style="margin-left:auto;pointer-events:none;"></div>
+          </button>
           <div style="text-align:right;">
             <a href="#" onclick="clearAcledStorage();return false;"
                style="font-size:0.58rem;color:rgba(255,0,60,0.45);text-decoration:none;">
@@ -4831,14 +4832,17 @@ function toggleAcledLayer() {
   acledLayerOn = !acledLayerOn;
   const btn    = document.getElementById('btn-acled');
   const sw     = document.getElementById('db-layer-switch');
+  const mapBtn = document.getElementById('db-show-map-btn');
   if (acledLayerOn) {
     acledMarkers.addTo(map);
-    btn.classList.add('active');
+    if (btn) btn.classList.add('active');
     if (sw) sw.classList.add('on');
+    if (mapBtn) { mapBtn.style.background='rgba(255,159,10,0.12)'; mapBtn.style.borderColor='var(--accent)'; mapBtn.style.color='var(--accent)'; }
   } else {
     map.removeLayer(acledMarkers);
-    btn.classList.remove('active');
+    if (btn) btn.classList.remove('active');
     if (sw) sw.classList.remove('on');
+    if (mapBtn) { mapBtn.style.background='rgba(154,154,154,0.08)'; mapBtn.style.borderColor='var(--border2)'; mapBtn.style.color='var(--text3)'; }
     document.getElementById('acled-banner').classList.remove('visible');
   }
 }
@@ -4922,10 +4926,12 @@ fetch('./data.json')
     // Auto-enable layer when data.json loads
     acledLayerOn = true;
     if (!map.hasLayer(acledMarkers)) acledMarkers.addTo(map);
-    const btn = document.getElementById('btn-acled');
-    const sw  = document.getElementById('db-layer-switch');
+    const btn    = document.getElementById('btn-acled');
+    const sw     = document.getElementById('db-layer-switch');
+    const mapBtn = document.getElementById('db-show-map-btn');
     if (btn) btn.classList.add('active');
     if (sw)  sw.classList.add('on');
+    if (mapBtn) { mapBtn.style.background='rgba(255,159,10,0.12)'; mapBtn.style.borderColor='var(--accent)'; mapBtn.style.color='var(--accent)'; }
     document.getElementById('acled-count').textContent = normalized.length.toLocaleString();
     const dbControls = document.getElementById('db-controls');
     const dbBadge    = document.getElementById('db-loaded-badge');
