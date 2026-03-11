@@ -257,7 +257,7 @@
     display: none; padding: 10px 16px 12px;
     flex-direction: column; gap: 10px;
   }
-  .hist-panel.open .hist-body { display: flex; }
+  .hist-panel.open .hist-body { /* display managed by JS */ }
 
   .hist-section-label {
     font-size: 0.6rem; font-weight: 600; color: var(--text3);
@@ -851,7 +851,7 @@
         </div>
         <span class="hist-chevron">▼</span>
       </div>
-      <div class="hist-body">
+      <div class="hist-body" id="hist-body">
 
         <!-- Upload button -->
         <label id="db-upload-label" style="display:flex;align-items:center;gap:6px;
@@ -4373,7 +4373,9 @@ let histPanelOpen = false;
 function toggleHistPanel() {
   histPanelOpen = !histPanelOpen;
   const panel = document.getElementById('hist-panel');
+  const body  = document.getElementById('hist-body');
   panel.classList.toggle('open', histPanelOpen);
+  if (body) body.style.display = histPanelOpen ? 'flex' : 'none';
 }
 
 function getHistCutoff() {
@@ -4837,7 +4839,7 @@ function toggleAcledLayer() {
     acledMarkers.addTo(map);
     if (btn) btn.classList.add('active');
     if (sw) sw.classList.add('on');
-    if (mapBtn) { mapBtn.style.background='rgba(255,159,10,0.12)'; mapBtn.style.borderColor='var(--accent)'; mapBtn.style.color='var(--accent)'; }
+    if (mapBtn) { mapBtn.style.background='rgba(10,132,255,0.15)'; mapBtn.style.borderColor='#0a84ff'; mapBtn.style.color='#0a84ff'; }
   } else {
     map.removeLayer(acledMarkers);
     if (btn) btn.classList.remove('active');
@@ -4931,7 +4933,7 @@ fetch('./data.json')
     const mapBtn = document.getElementById('db-show-map-btn');
     if (btn) btn.classList.add('active');
     if (sw)  sw.classList.add('on');
-    if (mapBtn) { mapBtn.style.background='rgba(255,159,10,0.12)'; mapBtn.style.borderColor='var(--accent)'; mapBtn.style.color='var(--accent)'; }
+    if (mapBtn) { mapBtn.style.background='rgba(10,132,255,0.15)'; mapBtn.style.borderColor='#0a84ff'; mapBtn.style.color='#0a84ff'; }
     document.getElementById('acled-count').textContent = normalized.length.toLocaleString();
     const dbControls = document.getElementById('db-controls');
     const dbBadge    = document.getElementById('db-loaded-badge');
