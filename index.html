@@ -342,6 +342,20 @@
   }
   .cat-tabs::-webkit-scrollbar { display:none; }
 
+
+  .time-tabs {
+    display: flex; gap: 4px; padding: 4px 10px 6px;
+    border-bottom: 0.5px solid var(--border2);
+  }
+  .time-tab {
+    background: none; border: 0.5px solid transparent;
+    border-radius: 5px; color: var(--text3);
+    font-family: inherit; font-size: 0.6rem; font-weight: 600;
+    padding: 3px 8px; cursor: pointer; transition: all 0.12s;
+    letter-spacing: 0.04em;
+  }
+  .time-tab:hover { color: var(--text2); border-color: var(--border2); }
+  .time-tab.active { color: var(--accent); border-color: var(--accent); background: rgba(255,159,10,0.08); }
   .cat-tab {
     background:none; border:none; border-bottom:2px solid transparent;
     color:var(--text3); font-family:inherit; font-size:0.7rem; font-weight:500;
@@ -797,7 +811,7 @@
         <button class="tv-btn" id="tv-btn" onclick="toggleTvPanel()"><svg width="14" height="11" viewBox="0 0 24 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="13" rx="2"/><path d="M8 18h8M12 15v3"/></svg> <span data-i18n="btn_media">MEDIA</span></button>
     <button class="tv-btn" id="sat-btn" onclick="toggleSatPanel()" style="border-color:rgba(100,200,255,0.3);"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.93" y1="4.93" x2="7.05" y2="7.05"/><line x1="16.95" y1="16.95" x2="19.07" y2="19.07"/><line x1="4.93" y1="19.07" x2="7.05" y2="16.95"/><line x1="16.95" y1="7.05" x2="19.07" y2="4.93"/></svg> <span data-i18n="btn_sat">SATELLITE</span></button>
     <button class="tv-btn" id="src-btn" onclick="toggleSrcPanel()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> <span data-i18n="btn_sources">SOURCES</span></button>
-    <button class="tv-btn" id="briefing-btn" onclick="toggleBriefingPanel()" style="border-color:rgba(100,200,255,0.3);">&#128203; BRIEFING</button>
+    <button class="tv-btn" id="briefing-btn" onclick="toggleBriefingPanel()" style="border-color:rgba(100,200,255,0.3);">&#128203; <span data-i18n="btn_briefing">BRIEFING</span></button>
   </div>
 </header>
 
@@ -981,6 +995,12 @@
         <button class="cat-tab"        data-cat="govt"         onclick="setCategory('govt')">Government</button>
         <button class="cat-tab"        data-cat="opposition"   onclick="setCategory('opposition')">Opposition</button>
         <button class="cat-tab"        data-cat="humanitarian" onclick="setCategory('humanitarian')">Humanitarian</button>
+      </div>
+      <div class="time-tabs" id="time-tabs">
+        <button class="time-tab active" onclick="setTimeFilter('24h')" data-tf="24h" data-i18n="tf_24h">24H</button>
+        <button class="time-tab" onclick="setTimeFilter('7d')"  data-tf="7d"  data-i18n="tf_7d">7 DAYS</button>
+        <button class="time-tab" onclick="setTimeFilter('30d')" data-tf="30d" data-i18n="tf_30d">30 DAYS</button>
+        <button class="time-tab" onclick="setTimeFilter('all')" data-tf="all" data-i18n="tf_all">ALL</button>
       </div>
     </div>
 
@@ -1545,7 +1565,8 @@ async function fetchViaProxy(url, timeoutMs = 4000) {
 let keywords = [...DEFAULT_KEYWORDS];
 let activeLanguages = new Set(["en", "my"]);
 let articles = [];
-let allArticlesPool = []; // full uncapped pool for hotspot inference
+let allArticlesPool = [];
+let activeTimeFilter = '24h'; // '24h' | '7d' | '30d' | 'all'
 let markers = [];
 let activeArticle = null;
 
@@ -3630,6 +3651,8 @@ async function fetchNews() {
   // Final render with everything once all promises settled
   clearTimeout(_renderTimer);
   processResults(allResults, [], feedsToFetch.length);
+  // Pre-generate briefing in background once data is loaded
+  setTimeout(() => { try { generateBriefing(); } catch(e) {} }, 500);
   const origText = btn.innerHTML;
   btn.innerHTML = `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Chargé`;
   btn.classList.add('done');
@@ -3651,6 +3674,7 @@ function processResults(rssResults, tgResults = [], rssCount = 0) {
 
   const raw = [];
   const seenUrls = new Set();
+  const seenTitles = new Set();
   for (const res of results) {
     if (res.status !== 'fulfilled' || !res.value) continue;
     const { feed, items } = res.value;
@@ -3659,8 +3683,14 @@ function processResults(rssResults, tgResults = [], rssCount = 0) {
       const location = detectLocation(combined);
       if (!location) continue;
       const itemUrl = item.link || '';
-      if (itemUrl && seenUrls.has(itemUrl)) continue; // dedup
+      if (itemUrl && seenUrls.has(itemUrl)) continue; // dedup URL
       if (itemUrl) seenUrls.add(itemUrl);
+      // Dedup by normalized title — strip source suffix (e.g. " - DW.com"), use first 80 chars
+      const titleKey = (item.title || '')
+        .replace(/\s*[-–|]\s*[^-–|]{1,30}$/, '') // remove " - Source" suffix
+        .replace(/\s+/g, ' ').trim().slice(0, 80).toLowerCase();
+      if (titleKey.length > 10 && seenTitles.has(titleKey)) continue;
+      if (titleKey.length > 10) seenTitles.add(titleKey);
       const rawPubDate = item.pubDate || '';
       const parsedDate = rawPubDate ? new Date(rawPubDate) : null;
       const validDate  = parsedDate && !isNaN(parsedDate);
@@ -3681,6 +3711,7 @@ function processResults(rssResults, tgResults = [], rssCount = 0) {
         description: stripHtml(item.description),
         lang:        feed.lang,
         type:        feed.type || 'rss',
+        _ts:         validDate ? parsedDate.getTime() : Date.now(),
       });
     }
   }
@@ -3693,8 +3724,16 @@ function processResults(rssResults, tgResults = [], rssCount = 0) {
     const db = b.date && b.date !== '—' ? new Date(b.date + (b.time ? 'T' + b.time.replace(' UTC','') : '')) : new Date(0);
     return db - da;
   });
+  // Final dedup pass on merged array — catch duplicates across feeds
+  const _seenFinal = new Set();
+  filtered = filtered.filter(a => {
+    const tk = (a.title||'').replace(/\s*[-–|]\s*\S+\s*$/, '').replace(/\s+/g,' ').trim().slice(0,80).toLowerCase();
+    if (tk.length > 10 && _seenFinal.has(tk)) return false;
+    if (tk.length > 10) _seenFinal.add(tk);
+    return true;
+  });
   allArticlesPool = filtered; // uncapped — used by hotspot inference
-  articles = filtered.slice(0, 300);
+  articles = filtered; // no cap
 
   renderFeed();
   updateStats();
@@ -3989,9 +4028,10 @@ function closePopup() {
 }
 
 function updateStats() {
-  const hi = articles.filter(a => a.severity === 'high').length;
-  const me = articles.filter(a => a.severity === 'medium').length;
-  const lo = articles.filter(a => a.severity === 'low').length;
+  const pool = applyTimeFilter(articles);
+  const hi = pool.filter(a => a.severity === 'high').length;
+  const me = pool.filter(a => a.severity === 'medium').length;
+  const lo = pool.filter(a => a.severity === 'low').length;
   document.getElementById('stat-high').textContent = hi;
   document.getElementById('stat-med').textContent  = me;
   document.getElementById('stat-low').textContent  = lo;
@@ -4043,9 +4083,25 @@ function setCategory(cat) {
   renderMarkers();
 }
 
+function setTimeFilter(tf) {
+  activeTimeFilter = tf;
+  document.querySelectorAll('.time-tab').forEach(t => t.classList.toggle('active', t.dataset.tf === tf));
+  renderFeed();
+  renderMarkers();
+  updateStats();
+}
+
+function applyTimeFilter(arr) {
+  if (activeTimeFilter === 'all') return arr;
+  const now = Date.now();
+  const ms = activeTimeFilter === '24h' ? 86400000 : activeTimeFilter === '7d' ? 604800000 : 2592000000;
+  const filtered = arr.filter(a => a._ts && (now - a._ts) <= ms);
+  return filtered.length > 0 ? filtered : arr;
+}
+
 function getFilteredArticles() {
-  if (activeCategory === 'general') return articles; // General = ALL news, no filter
-  return articles.filter(a => detectCategory(a) === activeCategory);
+  let result = activeCategory === 'general' ? articles : articles.filter(a => detectCategory(a) === activeCategory);
+  return applyTimeFilter(result);
 }
 
 
@@ -4072,104 +4128,183 @@ function toggleBriefingPanel() {
   if (isOpen) setTimeout(() => document.addEventListener('click', closer), 100);
 }
 
+// ── Briefing cache (reset at 07:00 Paris time each day) ──────────────
+let _briefingCache = null; // { dateKey, html }
+
+function getBriefingDateKey() {
+  // Returns "YYYY-MM-DD" in Paris time (CET=+1, CEST=+2)
+  const now = new Date();
+  const paris = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Paris' }));
+  // Only consider after 07:00 Paris time as "today's" briefing
+  const h = paris.getHours();
+  if (h < 7) {
+    // Before 7am → use yesterday's key so we keep previous briefing
+    paris.setDate(paris.getDate() - 1);
+  }
+  return paris.toISOString().slice(0, 10);
+}
+
 function generateBriefing() {
   const content = document.getElementById('briefing-content');
   const pool = allArticlesPool.length > 0 ? allArticlesPool : articles;
-
   if (pool.length === 0) {
     content.innerHTML = '<div style="color:var(--text3);text-align:center;padding:20px 0;">No data yet — refresh the feed first.</div>';
     return;
   }
+  if (_briefingCache && Math.abs((_briefingCache.poolSize||0) - pool.length) > 10) _briefingCache = null;
+  const dateKey = getBriefingDateKey();
+  if (_briefingCache && _briefingCache.dateKey === dateKey && (_briefingCache.poolSize||0) >= 5) {
+    content.innerHTML = _briefingCache.html; return;
+  }
 
-  const now = Date.now();
-  const h24 = 24 * 60 * 60 * 1000;
-  let recent = pool.filter(a => {
-    if (!a.pubDate) return false;
-    const d = new Date(a.pubDate);
-    return !isNaN(d) && (now - d.getTime()) < h24;
-  });
-  if (recent.length < 5) recent = pool.slice(0, Math.min(pool.length, 120));
+  const now_b = Date.now();
+  let recent = pool.filter(a => a._ts && (now_b - a._ts) <= 86400000);
+  if (recent.length < 5) recent = pool;
 
   const sections = {
-    military:     { label: 'Military', icon: '🔴', color: '#ef5350', items: [] },
-    opposition:   { label: 'Opposition / Resistance', icon: '🟢', color: '#66bb6a', items: [] },
-    humanitarian: { label: 'Humanitarian', icon: '🟡', color: '#ff9800', items: [] },
-    govt:         { label: 'Government / Politics', icon: '🔵', color: '#42a5f5', items: [] },
-    general:      { label: 'Other', icon: '⚪', color: '#888', items: [] },
+    military:     { label:'Military operations', icon:'🔴', color:'#ef5350', items:[] },
+    opposition:   { label:'Resistance activity', icon:'🟢', color:'#66bb6a', items:[] },
+    humanitarian: { label:'Humanitarian',        icon:'🟡', color:'#ff9800', items:[] },
+    govt:         { label:'Political/Government',icon:'🔵', color:'#42a5f5', items:[] },
+    general:      { label:'Other',               icon:'⚪', color:'#888',    items:[] },
   };
+  recent.forEach(a => { const cat=detectCategory(a)||'general'; (sections[cat]||sections.general).items.push(a); });
 
-  recent.forEach(a => {
-    const cat = detectCategory(a) || 'general';
-    (sections[cat] || sections.general).items.push(a);
-  });
+  const REGIONS = ['Kachin','Sagaing','Shan','Rakhine','Kayah','Karen','Kayin','Chin','Mon',
+    'Mandalay','Yangon','Bago','Magway','Ayeyarwady','Naypyidaw','Myitkyina','Lashio',
+    'Taunggyi','Mrauk-U','Sittwe','Loikaw','Demoso','Hakha','Hpapun','Papun','Mindat'];
 
-  const REGIONS = ['Kachin','Sagaing','Shan','Rakhine','Kayah','Karen','Kayin',
-    'Chin','Mon','Mandalay','Yangon','Bago','Magway','Ayeyarwady',
-    'Naypyidaw','Myitkyina','Lashio','Taunggyi','Mrauk-U','Sittwe',
-    'Loikaw','Demoso','Hakha','Hpapun','Papun','Mindat'];
+  function getTopRegions(items, n) {
+    const map = {};
+    items.forEach(a => {
+      const text = (a.title||'')+' '+(a.description||'');
+      for (const r of REGIONS) {
+        if (text.toLowerCase().includes(r.toLowerCase())) { map[r]=(map[r]||0)+1; break; }
+      }
+    });
+    return Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,n).map(([r,n])=>r+(n>1?' ('+n+')':''));
+  }
 
   function groupByRegion(items) {
-    const map = {};
-    const other = [];
+    const map={}, other=[];
     items.forEach(a => {
-      const text = (a.title||'') + ' ' + (a.description||'');
-      let hit = false;
+      const text=(a.title||'')+' '+(a.description||'');
+      let hit=false;
       for (const r of REGIONS) {
-        if (text.toLowerCase().includes(r.toLowerCase())) {
-          if (!map[r]) map[r] = [];
-          map[r].push(a);
-          hit = true; break;
-        }
+        if (text.toLowerCase().includes(r.toLowerCase())) { if(!map[r])map[r]=[]; map[r].push(a); hit=true; break; }
       }
       if (!hit) other.push(a);
     });
-    if (other.length) map['Unlocated'] = other;
+    if (other.length) map['Unlocated']=other;
     return map;
   }
 
   function buildText(items) {
-    const titles = items.slice(0,5)
-      .map(a => (a.title||'').replace(/\s+/g,' ').trim())
-      .filter(t => t.length > 8);
+    const titles = items.slice(0,5).map(a=>(a.title||'').replace(/\s+/g,' ').trim()).filter(t=>t.length>8);
     if (!titles.length) return '';
-    let text = titles.join('. ');
-    if (items.length > 5) text += ` (+${items.length-5} more)`;
-    return text + '.';
+    return titles.join('. ') + (items.length>5?' (+'+(items.length-5)+' more)':'') + '.';
   }
 
-  const dateStr = new Date().toLocaleDateString('en-GB', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  let html = `<div style="border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:10px;margin-bottom:14px;">
-    <div style="font-size:0.75rem;font-weight:700;color:var(--text);letter-spacing:.05em;text-transform:uppercase;">&#128203; ${dateStr}</div>
-    <div style="font-size:0.6rem;color:var(--text3);margin-top:3px;">${recent.length} events analysed</div>
-  </div>`;
+  // ── Diplomatic note prose ──────────────────────────────────
+  function buildDiplomaticNote() {
+    const T = TRANSLATIONS[currentLang] || TRANSLATIONS['en'];
+    const localeMap = {en:'en-GB', fr:'fr-FR', my:'my-MM'};
+    const dateStr = new Date().toLocaleDateString(localeMap[currentLang]||'en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    const mil   = sections.military.items;
+    const opp   = sections.opposition.items;
+    const hum   = sections.humanitarian.items;
+    const gov   = sections.govt.items;
+    const total = recent.length;
+
+    let note = (T.briefing_asof||'As of') + ' <b>' + dateStr + '</b>, ' + total + ' ' + (T.briefing_events_recorded||'events have been recorded across Myanmar in the past 24 hours.');
+
+    // Military
+    if (mil.length > 0) {
+      const regions = getTopRegions(mil, 3);
+      const eg = mil[0] ? (mil[0].title||'').replace(/\s+/g,' ').trim().slice(0,90) : '';
+      const word = mil.length>1 ? (T.briefing_mil_p||'military incidents') : (T.briefing_mil||'military incident');
+      note += (T.briefing_front||'On the military front') + ', <b>' + mil.length + ' ' + word + '</b> were reported';
+      if (regions.length) note += (T.briefing_concentrated||', concentrated in ') + regions.join(', ');
+      note += '. ';
+      if (eg) note += eg + (eg.length>=90?'…':'') + '. ';
+    }
+
+    // Opposition
+    if (opp.length > 0) {
+      const regions = getTopRegions(opp, 2);
+      const eg = opp[0] ? (opp[0].title||'').replace(/\s+/g,' ').trim().slice(0,90) : '';
+      const word = opp.length>1 ? (T.briefing_opp_p||'actions') : (T.briefing_opp||'action');
+      note += (T.briefing_opp_front||'Resistance forces recorded') + ' <b>' + opp.length + ' ' + word + '</b>';
+      if (regions.length) note += (T.briefing_in||' in ') + regions.join(' and ');
+      note += '. ';
+      if (eg) note += eg + (eg.length>=90?'…':'') + '. ';
+    }
+
+    // Humanitarian
+    if (hum.length > 0) {
+      const regions = getTopRegions(hum, 2);
+      const eg = hum[0] ? (hum[0].title||'').replace(/\s+/g,' ').trim().slice(0,90) : '';
+      const word = hum.length>1 ? (T.briefing_hum_p||'reports') : (T.briefing_hum||'report');
+      note += (T.briefing_hum_front||'The humanitarian situation generated') + ' <b>' + hum.length + ' ' + word + '</b>';
+      if (regions.length) note += (T.briefing_notably||', notably in ') + regions.join(' and ');
+      note += '. ';
+      if (eg) note += eg + (eg.length>=90?'…':'') + '. ';
+    }
+
+    // Political
+    if (gov.length > 0) {
+      const eg = gov[0] ? (gov[0].title||'').replace(/\s+/g,' ').trim().slice(0,90) : '';
+      const word = gov.length>1 ? (T.briefing_gov_p||'developments') : (T.briefing_gov||'development');
+      note += (T.briefing_gov_front||'On the political front') + ', <b>' + gov.length + ' ' + word + '</b> were noted. ';
+      if (eg) note += eg + (eg.length>=90?'…':'') + '. ';
+    }
+
+    return note;
+  }
+
+  const dateStr = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const parisTimeStr = new Date().toLocaleTimeString('fr-FR',{timeZone:'Europe/Paris',hour:'2-digit',minute:'2-digit'});
+
+  let html = '<div style="border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:10px;margin-bottom:14px;">'
+    +'<div style="font-size:0.75rem;font-weight:700;color:var(--text);letter-spacing:.05em;text-transform:uppercase;">📋 '+dateStr+'</div>'
+    +'<div style="font-size:0.6rem;color:var(--text3);margin-top:2px;">'+recent.length+' events · '+parisTimeStr+' (Paris)</div>'
+    +'</div>';
+
+  // Diplomatic note
+  html += '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:13px 15px;margin-bottom:18px;border:0.5px solid rgba(255,255,255,.12);">'
+    +'<div style="font-size:0.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:10px;">'+((TRANSLATIONS[currentLang]||TRANSLATIONS['en']).briefing_summary||'SITUATION REPORT')+'</div>'
+    +'<div style="font-size:0.7rem;color:rgba(255,255,255,.85);line-height:1.85;text-align:justify;">'
+    + buildDiplomaticNote()
+    +'</div></div>';
+
+  // Detailed breakdown
+  html += '<div style="font-size:0.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:10px;">'+ ((TRANSLATIONS[currentLang]||TRANSLATIONS['en']).briefing_detail||'DETAILED BREAKDOWN') +'</div>';
 
   const order = ['military','opposition','humanitarian','govt','general'];
   for (const key of order) {
     const sec = sections[key];
     if (!sec.items.length) continue;
-    const regionMap = groupByRegion(sec.items);
-    const entries = Object.entries(regionMap).sort((a,b) => b[1].length - a[1].length);
-
-    html += `<div style="margin-bottom:16px;">
-      <div style="font-size:0.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:${sec.color};margin-bottom:8px;display:flex;align-items:center;gap:6px;">
-        ${sec.icon} ${sec.label}
-        <span style="font-size:0.55rem;font-weight:500;color:var(--text3);background:rgba(255,255,255,.06);padding:1px 6px;border-radius:8px;">${sec.items.length}</span>
-      </div>`;
-
-    for (const [region, items] of entries.slice(0,5)) {
+    const rmap = groupByRegion(sec.items);
+    const entries = Object.entries(rmap).sort((a,b)=>b[1].length-a[1].length);
+    html += '<div style="margin-bottom:16px;">'
+      +'<div style="font-size:0.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:'+sec.color+';margin-bottom:8px;display:flex;align-items:center;gap:6px;">'
+      +sec.icon+' '+sec.label
+      +'<span style="font-size:0.55rem;color:var(--text3);background:rgba(255,255,255,.06);padding:1px 6px;border-radius:8px;">'+sec.items.length+'</span>'
+      +'</div>';
+    for (const [region,items] of entries.slice(0,6)) {
       const text = buildText(items);
       if (!text) continue;
-      html += `<div style="background:rgba(255,255,255,.04);border-radius:7px;padding:9px 11px;border-left:2px solid ${sec.color};margin-bottom:6px;">
-        <div style="font-size:0.58rem;font-weight:600;color:rgba(255,255,255,.5);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em;">${region} · ${items.length} event${items.length>1?'s':''}</div>
-        <div style="font-size:0.67rem;color:rgba(255,255,255,.75);line-height:1.55;">${text}</div>
-      </div>`;
+      html += '<div style="background:rgba(255,255,255,.04);border-radius:7px;padding:9px 11px;border-left:2px solid '+sec.color+';margin-bottom:6px;">'
+        +'<div style="font-size:0.58rem;font-weight:600;color:rgba(255,255,255,.5);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em;">'+region+' · '+items.length+' event'+(items.length>1?'s':'')+'</div>'
+        +'<div style="font-size:0.67rem;color:rgba(255,255,255,.75);line-height:1.55;">'+text+'</div>'
+        +'</div>';
     }
-    html += `</div>`;
+    html += '</div>';
   }
 
+  _briefingCache = {dateKey, html, poolSize: pool.length};
   content.innerHTML = html;
 }
-
 function toggleSrcPanel() {
   const p = document.getElementById('src-panel'), b = document.getElementById('src-btn');
   const isOpen = p.classList.toggle('open');
@@ -4469,8 +4604,7 @@ function processAcledText(text, filename) {
   if (dbControls) dbControls.style.display = 'flex';
   if (dbBadge)    dbBadge.style.display    = 'inline';
 
-  if (!histPanelOpen) toggleHistPanel();
-
+  // histPanel no longer auto-opens
   return rows.length;
 }
 
@@ -4741,7 +4875,7 @@ fetch('./data.json')
       `✓ ${normalized.length.toLocaleString()} historical events`,
       `data.json · ${fmt.toUpperCase()} 1989–2024${dateRange}`
     );
-    if (!histPanelOpen) toggleHistPanel();
+    // histPanel no longer auto-opens
   })
   .catch(() => {}); // silent if no data.json
 
@@ -4983,7 +5117,15 @@ var TRANSLATIONS = {
     btn_satellite:'SATELLITE', btn_zones:'CONTROL ZONES', btn_mines:'MINES',
     btn_scam:'SCAM', btn_transport:'TRANSPORT', btn_military:'MILITARY BASES',
     btn_cities:'LABELS', btn_gt:'GOLDEN TRIANGLE', btn_airstrikes:'AIRSTRIKES',
-    btn_media:'MEDIA', btn_sat:'SATELLITE', btn_sources:'SOURCES',
+    tf_24h:'24H', tf_7d:'7 DAYS', tf_30d:'30 DAYS', tf_all:'ALL',
+    btn_media:'MEDIA', btn_sat:'SATELLITE', btn_sources:'SOURCES', btn_briefing:'BRIEFING',
+    briefing_title:'SITUATION REPORT', briefing_summary:'SITUATION REPORT', briefing_detail:'DETAILED BREAKDOWN',
+    briefing_mil:'military incident', briefing_mil_p:'military incidents', briefing_front:'On the military front',
+    briefing_opp:'action', briefing_opp_p:'actions', briefing_opp_front:'Resistance forces recorded',
+    briefing_hum:'report', briefing_hum_p:'reports', briefing_hum_front:'The humanitarian situation generated',
+    briefing_gov:'development', briefing_gov_p:'developments', briefing_gov_front:'On the political front',
+    briefing_asof:'As of', briefing_events_recorded:'events have been recorded across Myanmar in the past 24 hours.',
+    briefing_concentrated:' concentrated in ', briefing_notably:' notably in ', briefing_in:' in ',
     // Header stats
     stat_high:'High', stat_med:'Med', stat_low:'Low',
     // Map stats panel
@@ -5066,7 +5208,15 @@ var TRANSLATIONS = {
     btn_satellite:'SATELLITE', btn_zones:'ZONES DE CONTRÔLE', btn_mines:'MINES',
     btn_scam:'SCAM', btn_transport:'TRANSPORT', btn_military:'BASES MILITAIRES',
     btn_cities:'LABELS', btn_gt:'TRIANGLE D\u2019OR', btn_airstrikes:'FRAPPES AÉRIENNES',
-    btn_media:'MÉDIAS', btn_sat:'SATELLITE', btn_sources:'SOURCES',
+    tf_24h:'24H', tf_7d:'7 JOURS', tf_30d:'30 JOURS', tf_all:'TOUT',
+    btn_media:'MÉDIAS', btn_sat:'SATELLITE', btn_sources:'SOURCES', btn_briefing:'BRIEFING',
+    briefing_title:'RAPPORT DE SITUATION', briefing_summary:'RAPPORT DE SITUATION', briefing_detail:'DÉTAIL PAR SECTEUR',
+    briefing_mil:'incident militaire', briefing_mil_p:'incidents militaires', briefing_front:'Sur le plan militaire',
+    briefing_opp:'action', briefing_opp_p:'actions', briefing_opp_front:'Les forces de résistance ont enregistré',
+    briefing_hum:'rapport', briefing_hum_p:'rapports', briefing_hum_front:'La situation humanitaire a généré',
+    briefing_gov:'développement', briefing_gov_p:'développements', briefing_gov_front:'Sur le plan politique',
+    briefing_asof:'Au', briefing_events_recorded:"événements ont été enregistrés en Birmanie au cours des dernières 24 heures.",
+    briefing_concentrated:' concentrés en ', briefing_notably:' notamment en ', briefing_in:' en ',
     stat_high:'Élevé', stat_med:'Mod.', stat_low:'Bas',
     stat_events:'Événements', stat_medium:'Moyen', stat_low_label:'Bas', stat_acled:'Événements ACLED',
     legend_zones:'Contrôle territorial · RSS', legend_zones_sub:'Déduit des flux RSS · 90 jours',
@@ -5140,7 +5290,15 @@ var TRANSLATIONS = {
     btn_scam:'လိမ်လည်မှု', btn_transport:'သယ်ယူပို့ဆောင်ရေး', btn_military:'စစ်ဘေ့စ်များ',
     btn_cities:'တံဆိပ်များ', btn_gt:'ရွေးကြည်ကြိုး',
     btn_airstrikes:'လေကြောင်းတိုက်ခိုက်မှု',
-    btn_media:'မီဒီယာ', btn_sat:'ဂြိုလ်တု', btn_sources:'အရင်းအမြစ်များ',
+    tf_24h:'၂၄နာရီ', tf_7d:'၇ ရက်', tf_30d:'၃၀ ရက်', tf_all:'အားလုံး',
+    btn_media:'မီဒီယာ', btn_sat:'ဂြိုလ်တု', btn_sources:'အရင်းအမြစ်များ', btn_briefing:'သတင်းအကျဉ်း',
+    briefing_title:'အခြေအနေ အစီရင်ခံစာ', briefing_summary:'အခြေအနေ အစီရင်ခံစာ', briefing_detail:'အသေးစိတ် ခွဲခြမ်းစိတ်ဖြာချက်',
+    briefing_mil:'စစ်ရေးဖြစ်ရပ်', briefing_mil_p:'စစ်ရေးဖြစ်ရပ်များ', briefing_front:'စစ်ရေးနယ်ပယ်တွင်',
+    briefing_opp:'လှုပ်ရှားမှု', briefing_opp_p:'လှုပ်ရှားမှုများ', briefing_opp_front:'တော်လှန်ရေးအင်အားများမှ',
+    briefing_hum:'အစီရင်ခံစာ', briefing_hum_p:'အစီရင်ခံစာများ', briefing_hum_front:'လူသားချင်းစာနာမှုအခြေအနေ',
+    briefing_gov:'ဖြစ်ရပ်', briefing_gov_p:'ဖြစ်ရပ်များ', briefing_gov_front:'နိုင်ငံရေးနယ်ပယ်တွင်',
+    briefing_asof:'မြန်မာနိုင်ငံတစ်ဝှမ်း', briefing_events_recorded:'ဖြစ်ရပ်များကို မှတ်တမ်းတင်ထားသည်။',
+    briefing_concentrated:' တွင် အများဆုံး ', briefing_notably:' အထူးသဖြင့် ', briefing_in:' တွင် ',
     stat_high:'မြင့်မား', stat_med:'အလယ်', stat_low:'နိမ့်',
     stat_events:'ဖြစ်ရပ်များ', stat_medium:'အလယ်အလတ်', stat_low_label:'နိမ့်', stat_acled:'ACLED ဖြစ်ရပ်များ',
     legend_zones:'ထိန်းချုပ်ဇုန် · RSS', legend_zones_sub:'RSS မှ ရက် ၉၀ ခန့်မှန်း',
@@ -5214,6 +5372,7 @@ var TRANSLATIONS = {
 function applyTranslations(lang) {
   var T = TRANSLATIONS[lang];
   if (!T) return;
+  if (currentLang !== lang) _briefingCache = null; // invalidate on lang change
   currentLang = lang;
   var els = document.querySelectorAll('[data-i18n]');
   for (var i = 0; i < els.length; i++) {
@@ -5262,6 +5421,12 @@ function selectLang(lang) {
   applyTranslations(lang);
   var sel = document.getElementById('lang-select');
   if (sel) sel.value = lang;
+  // Regenerate briefing in new language if panel is open or cached
+  _briefingCache = null;
+  const bp = document.getElementById('briefing-panel');
+  if (bp && bp.classList.contains('open')) {
+    try { generateBriefing(); } catch(e) {}
+  }
 }
 
 setTimeout(function() {
