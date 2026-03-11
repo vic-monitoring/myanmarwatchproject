@@ -4874,12 +4874,36 @@ fetch('./data.json')
   .then(r => { if (!r.ok) throw new Error('not found'); return r.json(); })
   .then(rows => {
     if (!Array.isArray(rows) || rows.length === 0) throw new Error('empty');
-    // Normalize keys to lowercase to match processAcledText expectations
-    const normalized = rows.map(row => {
-      const n = {};
-      Object.keys(row).forEach(k => { n[k.toLowerCase()] = row[k]; });
-      return n;
-    });
+    let normalized;
+    // Detect array-of-arrays format (first row = headers)
+    if (Array.isArray(rows[0])) {
+      const headers = rows[0].map(h => String(h).toLowerCase());
+      normalized = rows.slice(1).map(row => {
+        const n = {};
+        headers.forEach((h, i) => { n[h] = row[i]; });
+        return n;
+      });
+    } else {
+      normalized = rows.map(row => {
+        const n = {};
+        Object.keys(row).forEach(k => { n[k.toLowerCase()] = row[k]; });
+        return n;
+      });
+    }
+    // Map compact UCDP keys to expected field names
+    if (normalized[0] && normalized[0].tv !== undefined) {
+      normalized = normalized.map(r => ({
+        ...r,
+        latitude:         r.lat,
+        longitude:        r.lng,
+        type_of_violence: r.tv,
+        date_start:       r.sd || r.yr ? (r.sd || r.yr + '-01-01') : null,
+        side_a:           r.a,
+        side_b:           r.b,
+        adm1:             r.adm1,
+        best:             r.best,
+      }));
+    }
     const sample = normalized[0];
     const fmt = sample.event_type ? 'acled' : sample.type_of_violence ? 'ucdp' : 'acled';
     buildAcledMarkers(normalized, fmt);
