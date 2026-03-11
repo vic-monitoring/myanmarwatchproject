@@ -4453,7 +4453,14 @@ function setDbFatalFilter(val) {
 function updateDbCounts() {
   const counts = {};
   Object.keys(ACLED_CONFIG).forEach(t => counts[t] = 0);
-  dbAllEvents.forEach(ev => { if (counts[ev._type] !== undefined) counts[ev._type]++; });
+  // Count only events matching current date/fatality filters
+  const { from, to } = getDbCutoff();
+  dbAllEvents.forEach(ev => {
+    if (from && ev._date && ev._date < from) return;
+    if (to   && ev._date && ev._date > to)   return;
+    if (ev._fatalities < dbFatalMin) return;
+    if (counts[ev._type] !== undefined) counts[ev._type]++;
+  });
 
   document.getElementById('db-count-Battles').textContent   = counts['Battles'] || 0;
   document.getElementById('db-count-Explosions').textContent = counts['Explosions/Remote violence'] || 0;
@@ -4540,6 +4547,8 @@ function rebuildVisibleMarkers() {
     return true;
   });
   visible.forEach(ev => acledMarkers.addLayer(ev._marker));
+  // Always ensure layer is on the map if toggled on
+  if (acledLayerOn && !map.hasLayer(acledMarkers)) acledMarkers.addTo(map);
   document.getElementById('acled-count').textContent = visible.length.toLocaleString();
   const rangeEl = document.getElementById('db-date-range-display');
   if (rangeEl && visible.length > 0) {
@@ -4911,14 +4920,12 @@ fetch('./data.json')
     acledLoaded = true;
     localStorage.removeItem('acled_csv'); // data.json takes priority over cached CSV
     // Auto-enable layer when data.json loads
-    if (!acledLayerOn) {
-      acledLayerOn = true;
-      acledMarkers.addTo(map);
-      const btn = document.getElementById('btn-acled');
-      const sw  = document.getElementById('db-layer-switch');
-      if (btn) btn.classList.add('active');
-      if (sw)  sw.classList.add('on');
-    }
+    acledLayerOn = true;
+    if (!map.hasLayer(acledMarkers)) acledMarkers.addTo(map);
+    const btn = document.getElementById('btn-acled');
+    const sw  = document.getElementById('db-layer-switch');
+    if (btn) btn.classList.add('active');
+    if (sw)  sw.classList.add('on');
     document.getElementById('acled-count').textContent = normalized.length.toLocaleString();
     const dbControls = document.getElementById('db-controls');
     const dbBadge    = document.getElementById('db-loaded-badge');
