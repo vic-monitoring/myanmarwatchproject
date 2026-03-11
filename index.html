@@ -1493,22 +1493,7 @@ async function fetchViaProxy(url, timeoutMs = 4000) {
   const cached = _fetchCache.get(url);
   if (cached && Date.now() - cached.ts < CACHE_TTL) return cached.data;
 
-  // Try our own Netlify function first (no rate limits, no CORS issues)
-  try {
-    const controller = new AbortController();
-    const t = setTimeout(() => controller.abort(), timeoutMs);
-    const res = await fetch('/.netlify/functions/proxy?url=' + encodeURIComponent(url), { signal: controller.signal });
-    clearTimeout(t);
-    if (res.ok) {
-      const text = await res.text();
-      if (text && text.length > 100) {
-        _fetchCache.set(url, { data: text, ts: Date.now() });
-        return text;
-      }
-    }
-  } catch(e) { /* fallback to public proxies */ }
-
-  // Fallback: race all public proxies simultaneously
+  // Race ALL proxies simultaneously — fastest wins
   const proxies = _bestProxy
     ? [_bestProxy, ...CORS_PROXIES.filter(p => p !== _bestProxy)]
     : CORS_PROXIES;
