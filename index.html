@@ -1493,7 +1493,22 @@ async function fetchViaProxy(url, timeoutMs = 4000) {
   const cached = _fetchCache.get(url);
   if (cached && Date.now() - cached.ts < CACHE_TTL) return cached.data;
 
-  // Race ALL proxies simultaneously — fastest wins
+  // Try Cloudflare Worker proxy first (no rate limits, no CORS)
+  try {
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), timeoutMs);
+    const res = await fetch('https://myanmar-proxy.victor-offer.workers.dev/?url=' + encodeURIComponent(url), { signal: controller.signal });
+    clearTimeout(t);
+    if (res.ok) {
+      const text = await res.text();
+      if (text && text.length > 100) {
+        _fetchCache.set(url, { data: text, ts: Date.now() });
+        return text;
+      }
+    }
+  } catch(e) { /* fallback to public proxies */ }
+
+  // Fallback: race all public proxies simultaneously
   const proxies = _bestProxy
     ? [_bestProxy, ...CORS_PROXIES.filter(p => p !== _bestProxy)]
     : CORS_PROXIES;
