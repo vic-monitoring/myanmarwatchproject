@@ -851,7 +851,7 @@
         </div>
         <span class="hist-chevron">▼</span>
       </div>
-      <div class="hist-body" id="hist-body">
+      <div class="hist-body" id="hist-body" style="display:none;">
 
         <!-- Upload button -->
         <label id="db-upload-label" style="display:flex;align-items:center;gap:6px;
@@ -954,16 +954,10 @@
           </div>
 
           <!-- Show on map + clear -->
-          <button id="db-show-map-btn" onclick="toggleAcledLayer()"
-            style="width:100%;display:flex;align-items:center;justify-content:center;gap:7px;
-                   background:rgba(154,154,154,0.08);border:0.5px solid var(--border2);
-                   border-radius:8px;color:var(--text3);padding:8px 12px;font-family:inherit;
-                   font-size:0.72rem;font-weight:600;cursor:pointer;transition:all 0.2s;
-                   letter-spacing:0.03em;">
-            <span>🗺</span>
-            <span data-i18n="hist_show_map">Show on map</span>
-            <div class="toggle-switch" id="db-layer-switch" style="margin-left:auto;pointer-events:none;"></div>
-          </button>
+          <div class="layer-toggle-row" onclick="toggleAcledLayer()" style="cursor:pointer;">
+            <span class="layer-toggle-label" data-i18n="hist_show_map">Show on map</span>
+            <div class="toggle-switch" id="db-layer-switch"></div>
+          </div>
           <div style="text-align:right;">
             <a href="#" onclick="clearAcledStorage();return false;"
                style="font-size:0.58rem;color:rgba(255,0,60,0.45);text-decoration:none;">
@@ -4587,16 +4581,6 @@ function processAcledText(text, filename) {
   }
 
   const fmt = hasAcled ? 'acled' : 'ucdp';
-  if (!acledLayerOn) {
-    acledLayerOn = true;
-    if (!map.hasLayer(acledMarkers)) acledMarkers.addTo(map);
-    const btn = document.getElementById('btn-acled');
-    const sw  = document.getElementById('db-layer-switch');
-    const mb  = document.getElementById('db-show-map-btn');
-    if (btn) btn.classList.add('active');
-    if (sw)  sw.classList.add('on');
-    if (mb)  { mb.style.background='rgba(10,132,255,0.15)'; mb.style.borderColor='#0a84ff'; mb.style.color='#0a84ff'; }
-  }
   buildAcledMarkers(rows, fmt);
   setAcledDot('ok');
   document.getElementById('acled-count').textContent = rows.length.toLocaleString();
@@ -4812,40 +4796,32 @@ function buildAcledMarkers(rows, fmt) {
   const allToggle = document.getElementById('db-all-toggle');
   if (allToggle) allToggle.classList.add('on');
 
-  // Set min/max dates from loaded data
+  // Set min/max dates only on first load (don't overwrite user selection)
   const validDates = dbAllEvents.map(e => e._date).filter(Boolean);
-  if (validDates.length) {
+  if (validDates.length && dbMinDate === null) {
     dbMinDate  = new Date(Math.min(...validDates));
     dbMaxDate  = new Date(Math.max(...validDates));
     dbFromYear = dbMinDate.getFullYear();
     dbToYear   = dbMaxDate.getFullYear();
     syncYearInputs();
-  } else {
-    dbFromYear = null;
-    dbToYear   = null;
   }
 
   updateDbCounts();
-
-  // Rebuild visible markers with current filters (date range etc.)
   rebuildVisibleMarkers();
 }
 
 function toggleAcledLayer() {
   acledLayerOn = !acledLayerOn;
-  const btn    = document.getElementById('btn-acled');
-  const sw     = document.getElementById('db-layer-switch');
-  const mapBtn = document.getElementById('db-show-map-btn');
+  const btn = document.getElementById('btn-acled');
+  const sw  = document.getElementById('db-layer-switch');
   if (acledLayerOn) {
-    acledMarkers.addTo(map);
+    if (!map.hasLayer(acledMarkers)) acledMarkers.addTo(map);
     if (btn) btn.classList.add('active');
-    if (sw) sw.classList.add('on');
-    if (mapBtn) { mapBtn.style.background='rgba(10,132,255,0.15)'; mapBtn.style.borderColor='#0a84ff'; mapBtn.style.color='#0a84ff'; }
+    if (sw)  sw.classList.add('on');
   } else {
     map.removeLayer(acledMarkers);
     if (btn) btn.classList.remove('active');
-    if (sw) sw.classList.remove('on');
-    if (mapBtn) { mapBtn.style.background='rgba(154,154,154,0.08)'; mapBtn.style.borderColor='var(--border2)'; mapBtn.style.color='var(--text3)'; }
+    if (sw)  sw.classList.remove('on');
     document.getElementById('acled-banner').classList.remove('visible');
   }
 }
@@ -4922,15 +4898,6 @@ fetch('./data.json')
     }
     const sample = normalized[0];
     const fmt = sample.event_type ? 'acled' : sample.type_of_violence ? 'ucdp' : 'acled';
-    // Enable layer BEFORE building so rebuildVisibleMarkers adds it to map
-    acledLayerOn = true;
-    if (!map.hasLayer(acledMarkers)) acledMarkers.addTo(map);
-    const btn    = document.getElementById('btn-acled');
-    const sw     = document.getElementById('db-layer-switch');
-    const mapBtn = document.getElementById('db-show-map-btn');
-    if (btn) btn.classList.add('active');
-    if (sw)  sw.classList.add('on');
-    if (mapBtn) { mapBtn.style.background='rgba(10,132,255,0.15)'; mapBtn.style.borderColor='#0a84ff'; mapBtn.style.color='#0a84ff'; }
     buildAcledMarkers(normalized, fmt);
     setAcledDot('ok');
     acledLoaded = true;
