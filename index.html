@@ -1419,6 +1419,42 @@ const GDELT_RSS_FEEDS = [
   { url: 'https://api.gdeltproject.org/api/v2/doc/doc?query=Myanmar+civilian+killed+OR+bombing&mode=artlist&maxrecords=15&sort=DateDesc&format=rss', label: 'GDELT Civilians' },
 ];
 
+
+const TELEGRAM_CHANNELS = [
+  { channel: 'theirrawaddy', source: '📱 Irrawaddy TG', lang: 'my' },
+  { channel: 'khitthitmedia', source: '📱 Khit Thit TG', lang: 'my' },
+];
+
+async function fetchTelegramChannel(channelCfg) {
+  try {
+    const res = await fetch('https://myanmar-proxy.victor-offer.workers.dev/telegram?channel=' + channelCfg.channel);
+    if (!res.ok) return null;
+    const html = await res.text();
+
+    const dates = [...html.matchAll(/<time[^>]*datetime="([^"]+)"/g)].map(m => m[1]);
+    const linkPattern = new RegExp('href="(https://t\\.me/' + channelCfg.channel + '/(\\d+))"', 'g');
+    const links = [...html.matchAll(linkPattern)].map(m => ({ url: m[1], id: m[2] }));
+    const texts = [...html.matchAll(/<div class="tgme_widget_message_text[^"]*"[^>]*>([\s\S]*?)<\/div>/g)]
+      .map(m => m[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim())
+      .filter(t => t.length > 20);
+
+    const items = [];
+    for (let i = 0; i < Math.min(texts.length, 20); i++) {
+      items.push({
+        title: texts[i].slice(0, 120) + (texts[i].length > 120 ? '\u2026' : ''),
+        description: texts[i],
+        link: links[i] ? links[i].url : 'https://t.me/' + channelCfg.channel,
+        pubDate: dates[i] || new Date().toISOString(),
+        source: channelCfg.source,
+        lang: channelCfg.lang,
+        type: 'telegram',
+      });
+    }
+    if (items.length === 0) return null;
+    return { feed: { source: channelCfg.source, lang: channelCfg.lang, type: 'telegram' }, items };
+  } catch(e) { return null; }
+}
+
 async function fetchGdelt() {
   const allItems = [];
   const seenUrls = new Set();
@@ -3613,6 +3649,9 @@ async function fetchNews() {
   const slowPromises = [
     fetchGdelt().then(v => v ? { status:'fulfilled', value: v } : { status:'rejected' }).catch(() => ({ status:'rejected' })),
     fetchReliefWeb().then(v => v ? { status:'fulfilled', value: v } : { status:'rejected' }).catch(() => ({ status:'rejected' })),
+    ...TELEGRAM_CHANNELS.map(ch =>
+      fetchTelegramChannel(ch).then(v => v ? { status:'fulfilled', value: v } : { status:'rejected' }).catch(() => ({ status:'rejected' }))
+    ),
   ];
   slowPromises.forEach(p => p.then(r => accumulateAndRender([r])));
   await Promise.allSettled(slowPromises);
