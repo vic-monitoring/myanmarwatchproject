@@ -15,24 +15,6 @@
 <meta name="twitter:title" content="Myanmar Watch — Live Conflict Intelligence">
 <meta name="twitter:description" content="Real-time conflict monitoring for Myanmar — RSS feeds, satellite imagery, territorial control zones.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🇲🇲</text></svg>">
-<link rel="canonical" href="https://myanmarwatch.com">
-<meta name="robots" content="index, follow">
-<meta name="language" content="English">
-<meta name="revisit-after" content="1 days">
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": "Myanmar Watch",
-  "url": "https://myanmarwatch.com",
-  "description": "Real-time conflict monitoring for Myanmar — territorial control, military bases, scam centers, satellite imagery and live RSS feeds from 35+ sources.",
-  "inLanguage": "en",
-  "about": {
-    "@type": "Thing",
-    "name": "Myanmar Conflict Monitoring"
-  }
-}
-</script>
 <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600&family=SF+Mono:wght@400;500&display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -3747,6 +3729,14 @@ function processResults(rssResults, tgResults = [], rssCount = 0) {
     return true;
   });
   allArticlesPool = filtered; // uncapped — used by hotspot inference
+
+  // ── Fusionner avec les articles D1 historiques ──
+  if (typeof _d1Articles !== 'undefined' && _d1Articles.length > 0) {
+    const existingLinks = new Set(filtered.map(a => a.link));
+    const d1New = _d1Articles.filter(a => !existingLinks.has(a.link));
+    allArticlesPool = [...filtered, ...d1New];
+  }
+
   articles = filtered; // no cap
 
   renderFeed();
@@ -4966,8 +4956,35 @@ roadsVisible = true;
 document.getElementById('btn-roads').classList.add('active');
 
 renderKeywords();
+
+// ── Charger les events historiques depuis D1 ──────────────────────────────
+let _d1Articles = []; // stockage persistant des articles D1
+
+async function loadHistoricalEvents() {
+  try {
+    const res = await fetch('https://myanmar-proxy.victor-offer.workers.dev/events?limit=2000');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data.events || data.events.length === 0) return;
+
+    _d1Articles = data.events.map(e => ({
+      title:       e.title,
+      link:        e.link,
+      pubDate:     e.published_at,
+      description: '',
+      source:      e.source,
+      lang:        'en',
+      type:        'rss',
+    }));
+
+    console.log(`[D1] Loaded ${_d1Articles.length} historical events`);
+  } catch(e) {
+    console.warn('[D1] Could not load historical events:', e.message);
+  }
+}
+
 // Start fetching immediately — proxy racing happens inside fetchViaProxy
-fetchNews();
+loadHistoricalEvents().then(() => fetchNews());
 setInterval(fetchNews, 5 * 60 * 1000);
 // Detect best proxy in background for future requests
 detectFastestProxy();
