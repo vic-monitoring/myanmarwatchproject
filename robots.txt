@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://myanmarwatch.com/sitemap.xml
