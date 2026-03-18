@@ -1739,12 +1739,13 @@ let myanmarOutline = null;
 
 // Myanmar border — high-res direct fetch, deferred 1s
 setTimeout(() => {
-  fetch('https://raw.githubusercontent.com/wmgeolab/geoBoundaries/main/releaseData/gbOpen/MMR/ADM0/geoBoundaries-MMR-ADM0.geojson')
+  fetch('./myanmar-border.geojson')
     .then(r => { if (!r.ok) throw new Error(); return r.json(); })
     .then(geojson => {
       myanmarOutline = L.geoJSON(geojson, {
         style: { color: '#c8a96e', fillColor: 'transparent', weight: 2, opacity: 0.85, fillOpacity: 0, interactive: false },
-        smoothFactor: 0
+        smoothFactor: 0,
+        tolerance: 0
       }).addTo(map);
     })
     .catch(() => {
