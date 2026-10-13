@@ -1002,6 +1002,7 @@
       </div>
     </div>
 
+    <div id="primary-source-status" role="status" style="padding:8px 14px;font-size:.65rem;color:var(--text2)">The Irrawaddy · loading primary source…</div>
     <div class="news-feed" id="news-feed">
       <div class="loading-bar"><div class="spinner"></div> Initializing feed...</div>
     </div>
@@ -1018,7 +1019,7 @@
         <div class="ctrl-dot"></div> <span data-i18n="btn_satellite">SATELLITE</span>
       </button>
       <button class="map-ctrl-btn" id="btn-zones" onclick="toggleZones()">
-        <div class="ctrl-dot"></div> <span data-i18n="btn_zones">CONTROL ZONES</span>
+        <div class="ctrl-dot"></div> <span data-i18n="btn_zones">TERRITORIAL REPORTS</span>
       </button>
       <button class="map-ctrl-btn" id="btn-jade" onclick="toggleJade()">
         <div class="ctrl-dot"></div> ⛏ <span data-i18n="btn_mines">MINES</span>
@@ -1063,24 +1064,12 @@
 
     <!-- ZONES LEGEND -->
     <div class="zones-legend" id="zones-legend">
-      <div class="zones-legend-title"><span data-i18n="legend_zones">Control Zones · RSS</span><span id="zones-hotspot-count" style="color:var(--accent);font-size:0.55rem;font-weight:400;"></span></div>
-      <div style="font-size:0.52rem;color:rgba(255,255,255,0.3);margin-bottom:4px;line-height:1.4;"><span data-i18n="legend_zones_sub">Inferred from RSS · 90 days</span></div>
-      <div class="legend-row"><div class="legend-swatch" style="background:#c0392b;border-radius:2px;"></div> SAC / Tatmadaw</div>
-      <div class="legend-row"><div class="legend-swatch" style="background:#8e44ad;border-radius:2px;"></div> <span data-i18n="legend_eao">EAO (KIA · AA · KNU…)</span></div>
-      <div class="legend-row"><div class="legend-swatch" style="background:#27ae60;border-radius:2px;"></div> <span data-i18n="legend_pdf">PDF / Resistance</span></div>
-      <div class="legend-row"><div class="legend-swatch" style="background:#f39c12;border-radius:2px;"></div> <span data-i18n="legend_contested">Contested</span></div>
-      <div class="legend-row"><div class="legend-swatch" style="background:#3a3a3c;border-radius:2px;border:0.5px solid rgba(255,255,255,.15);"></div> <span data-i18n="legend_nodata">No RSS data</span></div>
-      <div style="height:0.5px;background:rgba(255,255,255,.08);margin:5px 0;"></div>
-      <div class="legend-row"><div class="legend-swatch" style="background:#ff9f0a;border-radius:50%;"></div> <span data-i18n="legend_event">⚡ Recent event</span></div>
+      <div class="zones-legend-title"><span data-i18n="legend_zones">Territorial reports</span><span id="zones-hotspot-count"></span></div>
+      <div style="max-width:240px;font-size:.65rem;line-height:1.5" data-i18n="legend_zones_sub">The Irrawaddy · regional reference points, not verified control boundaries.</div>
     </div>
-
     <div class="zones-legend" id="scam-legend">
-      <div class="zones-legend-title"><span data-i18n="legend_scam_title">Scam Centers</span> <span id="scam-filter-reset" onclick="setScamFilter(null)" style="display:none;cursor:pointer;font-size:0.5rem;color:var(--accent);font-weight:400;margin-left:6px;"><span data-i18n="scam_reset">✕ tout afficher</span></span></div>
-      <div class="scam-legend-row" data-filter-type="ctrl" data-filter-val="bgf"               onclick="setScamFilter('ctrl','bgf')">              <div class="legend-swatch" style="background:#c0392b;">></div> <span data-i18n="scam_bgf">BGF (pro-junta)</span></div>
-      <div class="scam-legend-row" data-filter-type="ctrl" data-filter-val="dkba"              onclick="setScamFilter('ctrl','dkba')">             <div class="legend-swatch" style="background:#e67e22;">></div> <span data-i18n="scam_dkba">DKBA (pro-junta)</span></div>
-      <div class="scam-legend-row" data-filter-type="ctrl" data-filter-val="chinese_syndicate" onclick="setScamFilter('ctrl','chinese_syndicate')"><div class="legend-swatch" style="background:#8e44ad;">></div> <span data-i18n="scam_syndicate">Syndicate chinois</span></div>
-      <div class="scam-legend-row" data-filter-type="ctrl" data-filter-val="mndaa"             onclick="setScamFilter('ctrl','mndaa')">            <div class="legend-swatch" style="background:#27ae60;">></div> <span data-i18n="scam_mndaa">MNDAA (résistance)</span></div>
-      <div style="font-size:0.5rem;color:rgba(255,255,255,0.2);margin-top:5px;">Sources: C4ADS · Nikkei · Irrawaddy · JFM · Wikipedia jan 2026</div>
+      <div class="zones-legend-title" data-i18n="legend_scam_title">Scam reports</div>
+      <div style="max-width:240px;font-size:.65rem;line-height:1.5">The Irrawaddy · 2026-10-08<br>Myawaddy area. Individual compound locations and current activity unverified. Orange: recent report; grey: older than 30 days.</div>
     </div>
 
     <!-- Military bases legend — shown when military layer active -->
@@ -1201,38 +1190,36 @@
     </div>
 
     <div class="src-section">
-      <div class="src-title">🗺 <span data-i18n="src_zones_title">TERRITORIAL CONTROL ZONES</span></div>
-      <div class="src-desc" data-i18n="src_zones_desc">Zones colored dynamically from RSS articles (90-day rolling window). Weighted score by actor (SAC/EAO/PDF/Contested). Official borders: geoBoundaries ADM1 (CC BY 4.0).</div>
-      <div class="src-item"><span class="src-badge gnews">RSS</span><span data-i18n="src_zones_src">Colors inferred from: Irrawaddy, RFA, Myanmar Now, BBC, Reuters, Al Jazeera, GDELT, ReliefWeb, Google News, Google Alerts</span></div>
-      <div class="src-item"><span class="src-badge zone">TECH</span><span data-i18n="src_zones_algo">Algorithm: keyword-weighted score (captured=3pts, controls=2pts, fighting=1pt…) over 90 days. Dominant actor → region color.</span></div>
+      <div class="src-title">🗺 <span data-i18n="src_zones_title">TERRITORIAL REPORTS</span></div>
+      <div class="src-desc" data-i18n="src_zones_desc">Dated Irrawaddy reports at regional reference points. No inferred control boundaries.</div>
+      <div class="src-item"><span class="src-badge gnews">RSS</span><span data-i18n="src_zones_src">Primary source: The Irrawaddy. Open map reports for article links and dates.</span></div>
+      <div class="src-item"><span class="src-badge zone">TECH</span><span data-i18n="src_zones_algo">RSS headlines identify reports to read; they do not establish who controls a region. Curated review: 2026-10-13.</span></div>
     </div>
 
     <div class="src-section">
       <div class="src-title">⛏ <span data-i18n="src_mines_title">MINES &amp; RESOURCES (18 sites)</span></div>
-      <div class="src-desc" data-i18n="src_mines_desc">18 documented mining sites (jade, ruby, rare earths, gold, copper) with precise GPS coordinates.</div>
+      <div class="src-desc" data-i18n="src_mines_desc">Historical mining reference points. Coordinates, ownership and operating status require verification; not a current operational inventory.</div>
       <div class="src-item"><span class="src-badge zone">SRC</span>USGS Minerals Yearbook 2020–21 · ScienceDirect (Gardiner et al. 2016, Zaw 2017)</div>
       <div class="src-item"><span class="src-badge zone">SRC</span>GIA Field Reports (Pardieu) · ASEAN Minerals Database · ISP-Myanmar 2024</div>
       <div class="src-item"><span class="src-badge zone">SRC</span>Global Witness 2022 · Stimson Center 2025 · mindat.org · Pact/DELVE 2019</div>
     </div>
 
     <div class="src-section">
-      <div class="src-title">🕵 <span data-i18n="src_scam_title">SCAM CENTERS (15 sites)</span></div>
-      <div class="src-desc" data-i18n="src_scam_desc">15 documented sites. Operational data current as of January 2026.</div>
-      <div class="src-item"><span class="src-badge scam">SRC</span><a href="https://c4ads.org" target="_blank">C4ADS</a> — "Hot Lines" report Oct 2025 · <a href="https://justiceformyanmar.org" target="_blank">Justice for Myanmar</a> 2025</div>
-      <div class="src-item"><span class="src-badge scam">SRC</span><a href="https://www.nikkei.com" target="_blank">Nikkei Asia</a> Jul 2025 · <a href="https://www.irrawaddy.com" target="_blank">Irrawaddy</a> Oct–Nov 2025 · <a href="https://www.usip.org" target="_blank">USIP</a> 2024</div>
-      <div class="src-item"><span class="src-badge scam">SRC</span>PBS/AP Frontline Dec 2025 · Mekong Eye Nov 2025 · US OFAC Sanctions Lists 2025 · UN OHCHR 2023</div>
+      <div class="src-title">🕵 <span data-i18n="src_scam_title">SCAM INDUSTRY · REGIONAL REPORTS</span></div>
+      <div class="src-desc" data-i18n="src_scam_desc">Myawaddy: Irrawaddy report published 2026-10-08. Reviewed 2026-10-13. Individual compound coordinates and current status unverified.</div>
+      <div class="src-item"><span class="src-badge scam">SRC</span><a href="https://www.irrawaddy.com/news/burma/chinese-docuseries-hails-scam-victory-as-myanmar-fraud-empire-rebuilds.html" target="_blank" rel="noopener noreferrer">The Irrawaddy · 2026-10-08 · Myawaddy scam industry</a></div>
     </div>
 
     <div class="src-section">
       <div class="src-title">🏛 <span data-i18n="src_mil_title">MILITARY BASES (31 entries)</span></div>
-      <div class="src-desc" data-i18n="src_mil_desc">22 SAC/Tatmadaw installations + 9 EAO HQs. Individually sourced data.</div>
+      <div class="src-desc" data-i18n="src_mil_desc">Historical installation references. Current occupancy, operator and exact location not reverified.</div>
       <div class="src-item"><span class="src-badge zone">SRC</span>Myanmar Witness (myanmarwitness.org/airbases) · GlobalSecurity.org · Wikipedia Myanmar Air Force</div>
       <div class="src-item"><span class="src-badge zone">SRC</span>IISS Myanmar Conflict Map · ISP-Myanmar 2025 · The Diplomat · HDFF 2024</div>
     </div>
 
     <div class="src-section">
       <div class="src-title">🛰 <span data-i18n="src_sat_title">SATELLITE IMAGERY (10 zones)</span></div>
-      <div class="src-desc" data-i18n="src_sat_desc">10 tension zones with direct access to recent satellite images via Esri World Imagery.</div>
+      <div class="src-desc" data-i18n="src_sat_desc">10 tension zones with access to satellite basemaps (capture dates vary; not live imagery) via Esri World Imagery.</div>
       <div class="src-item"><span class="src-badge zone">SRC</span>Esri World Imagery · ArcGIS REST API · High resolution 1–2m</div>
     </div>
 
@@ -1760,404 +1747,48 @@ setTimeout(() => {
     });
 }, 1000);
 
-const ZONE_BASELINE = [
-
-  { geoNames: ["kachin"], name: "Kachin State (KIA)", label: "EAO (KIA)", color: "#8e44ad", opacity: 0.22,
-    info: "KIA controls ~80% of territory. Junta holds Myitkyina city, Bhamo, Mogaung. Heavy fighting along Ayeyarwady valley.",
-    coords: [[28.5,97.2],[28.3,98.5],[27.8,98.8],[27.2,98.5],[26.8,98.2],[26.5,97.8],[26.0,97.5],[25.8,97.8],[25.5,97.5],[25.2,97.2],[24.8,97.5],[24.5,97.8],[24.2,97.5],[24.0,97.2],[24.2,96.5],[24.8,96.2],[25.2,96.0],[25.8,96.2],[26.2,96.0],[26.5,96.2],[27.0,96.5],[27.5,96.8],[28.0,97.0],[28.5,97.2]]
-  },
-
-  { geoNames: ["sagaing"], name: "Sagaing Region (Contested)", label: "Contested", color: "#f39c12", opacity: 0.20,
-    info: "Most contested region in Myanmar. PDF + CNF + KIA control most townships. Junta holds Sagaing city, Shwebo, Monywa. 90%+ townships attacked since 2021.",
-    coords: [[26.0,94.2],[26.2,96.0],[25.8,96.2],[25.2,96.0],[24.8,96.2],[24.2,96.5],[24.0,97.2],[23.5,97.0],[23.2,96.8],[23.0,96.5],[22.8,96.2],[22.5,96.0],[22.2,95.8],[22.0,95.5],[21.8,95.2],[22.0,94.8],[22.5,94.5],[23.0,94.2],[23.5,93.8],[24.0,93.5],[24.5,93.8],[25.0,94.0],[25.5,94.2],[26.0,94.2]]
-  },
-
-  { geoNames: ["chin"], name: "Chin State (CNF/Resistance)", label: "Resistance/CNF", color: "#27ae60", opacity: 0.22,
-    info: "CNF (Chin National Front) + local PDF controls ~85% of Chin State including Hakha, Falam, Mindat. Junta isolated in Kalemyo.",
-    coords: [[24.5,93.8],[24.0,93.5],[23.5,93.8],[23.0,94.2],[22.5,94.5],[22.0,94.8],[21.8,95.2],[21.5,94.8],[21.2,94.2],[21.0,93.8],[20.8,93.2],[21.0,92.8],[21.3,92.5],[21.8,92.2],[22.2,92.5],[22.5,92.8],[22.8,93.2],[23.2,93.5],[23.6,93.3],[24.0,93.2],[24.5,93.8]]
-  },
-
-  { geoNames: ["rakhine"], name: "Rakhine State (AA)", label: "EAO (AA)", color: "#8e44ad", opacity: 0.25,
-    info: "Arakan Army controls ~80% of Rakhine State (Feb 2025) including Sittwe, Ann, Kyaukpyu, Thandwe. Heavy fighting for Maungdaw. Key strategic prize: Bay of Bengal coast + Kyaukpyu deepwater port.",
-    coords: [[21.3,92.5],[21.0,92.8],[20.8,93.2],[21.0,93.8],[20.8,93.5],[20.5,93.2],[20.2,93.0],[19.8,93.2],[19.5,93.5],[19.2,93.8],[18.8,93.8],[18.5,93.5],[18.2,94.0],[17.8,94.3],[17.5,94.0],[17.2,94.2],[16.8,94.5],[16.5,94.2],[16.2,94.0],[16.0,94.5],[16.5,95.0],[17.0,94.8],[17.5,94.5],[18.0,94.2],[18.5,94.0],[19.0,93.5],[19.5,93.0],[20.0,92.5],[20.5,92.2],[21.0,92.2],[21.3,92.5]]
-  },
-
-  { name: "Mandalay Region (SAC/Contested)", label: "SAC Junta", color: "#c0392b", opacity: 0.22,
-    info: "SAC holds Mandalay city, Pyin Oo Lwin, Meiktila. Rural townships increasingly contested by PDF. Key supply lines threatened.",
-    coords: [[22.8,96.2],[23.0,96.5],[23.2,96.8],[23.0,97.2],[22.5,97.0],[22.2,96.8],[22.0,96.5],[21.8,96.2],[21.5,96.0],[21.2,95.8],[21.0,95.5],[21.2,95.2],[21.5,95.0],[22.0,95.2],[22.5,95.5],[22.8,95.8],[22.8,96.2]]
-  },
-
-  { geoNames: ["magway"], name: "Magway Region (Contested)", label: "Contested", color: "#f39c12", opacity: 0.20,
-    info: "PDF + resistance active across most townships. Junta holds Magway city, Pakokku, Yenangyaung. Petroleum infrastructure targeted repeatedly.",
-    coords: [[22.0,95.5],[22.2,95.8],[22.5,96.0],[22.2,96.2],[21.8,96.0],[21.5,95.8],[21.0,95.5],[20.5,95.2],[20.2,95.0],[20.0,94.8],[19.8,94.5],[20.0,94.0],[20.5,93.8],[21.0,93.8],[21.5,94.2],[21.8,94.5],[22.0,94.8],[22.0,95.5]]
-  },
-
-  { name: "Bago Region (SAC/Contested)", label: "SAC Junta", color: "#c0392b", opacity: 0.20,
-    info: "SAC holds Bago city, Toungoo, Pyay. Rural areas contested by PDF and KNU. Key Yangon-Mandalay highway corridor held by junta.",
-    coords: [[19.5,95.5],[20.0,95.0],[20.2,95.0],[20.5,95.2],[21.0,95.5],[20.8,96.0],[20.5,96.5],[20.0,96.8],[19.5,97.0],[19.0,96.8],[18.5,96.5],[18.5,96.0],[19.0,95.8],[19.5,95.5]]
-  },
-
-  { name: "Naypyidaw / Central (SAC)", label: "SAC Junta", color: "#c0392b", opacity: 0.25,
-    info: "SAC heartland. Naypyidaw Union Territory — military capital, command HQ. Heavily fortified. Directly administered by SAC.",
-    coords: [[20.0,96.0],[20.5,96.5],[20.0,96.8],[19.5,97.0],[19.2,97.2],[18.9,97.0],[19.0,96.8],[18.8,96.5],[18.5,96.5],[18.8,96.0],[19.0,95.8],[19.5,95.5],[19.8,95.8],[20.0,96.0]]
-  },
-
-  { geoNames: ["yangon"], name: "Yangon Region (SAC)", label: "SAC Junta", color: "#c0392b", opacity: 0.25,
-    info: "SAC stronghold — economic capital. Junta holds Yangon, Thanlyin, Insein. PDF cells active in outer townships but no territorial control.",
-    coords: [[17.5,96.5],[18.0,96.8],[18.5,96.5],[18.5,96.0],[18.0,95.8],[17.5,96.0],[17.2,96.2],[16.8,96.0],[16.5,96.0],[16.2,96.2],[16.5,96.8],[17.0,97.0],[17.5,97.0],[17.8,96.8],[17.5,96.5]]
-  },
-
-  { geoNames: ["shan"], name: "Northern Shan (Three Brotherhood)", label: "EAO (Brotherhood)", color: "#8e44ad", opacity: 0.22,
-    info: "Three Brotherhood Alliance (MNDAA + TNLA + AA) controls Lashio (captured Aug 2024), Kokang (Muse area), Hseni, Kutkai. Major gains from Op 1027 (Oct 2023). MNDAA holds Kokang Self-Admin Zone, TNLA holds large swaths of northern Shan.",
-    coords: [[24.2,97.5],[24.0,97.8],[23.8,98.2],[23.5,98.5],[23.2,98.8],[23.0,99.2],[22.8,99.5],[22.5,99.8],[22.2,100.0],[22.0,100.2],[21.8,100.0],[21.5,99.5],[21.8,99.0],[22.0,98.5],[22.2,98.2],[22.5,97.8],[22.8,97.5],[23.0,97.2],[23.2,97.0],[23.5,97.2],[23.8,97.5],[24.2,97.5]]
-  },
-
-  { name: "Southern Shan (Contested)", label: "Contested", color: "#f39c12", opacity: 0.18,
-    info: "Contested between RCSS/SSA-South, PNLO, Shan PDF and SAC. Taunggyi held by junta. Loilem, Mong Nai areas contested. Drug trade (Golden Triangle overlap).",
-    coords: [[22.0,98.5],[21.8,99.0],[21.5,99.5],[21.0,99.8],[20.8,99.5],[20.5,99.2],[20.2,98.8],[20.0,98.5],[19.8,98.2],[19.5,97.8],[19.8,97.5],[20.0,97.2],[20.5,97.0],[21.0,96.5],[21.5,96.5],[21.8,97.0],[22.0,97.5],[22.0,98.5]]
-  },
-
-  { name: "Wa State (UWSA — Autonomous)", label: "EAO (UWSA)", color: "#1abc9c", opacity: 0.30,
-    info: "United Wa State Army (UWSA) — 30,000+ troops, de facto independent since 1989. No conflict with SAC. Controls Special Region No.2. Major opium eradication + methamphetamine production. China-aligned buffer zone.",
-    coords: [[23.2,98.8],[23.0,99.2],[22.8,99.5],[22.5,99.2],[22.2,98.8],[22.5,98.5],[22.8,98.2],[23.0,98.5],[23.2,98.8]]
-  },
-
-  { name: "Kayah State (KNDF/Resistance)", label: "Resistance/KNDF", color: "#27ae60", opacity: 0.25,
-    info: "KNDF (Karenni Nationalities Defence Force) + Karenni Army controls ~90% of Kayah State. Loikaw capital fell to resistance Nov 2023. SAC completely expelled from most townships. One of resistance's strongest territorial gains.",
-    coords: [[20.2,97.0],[20.0,97.2],[19.8,97.5],[19.5,97.8],[19.2,97.5],[19.0,97.2],[18.8,97.0],[18.8,97.5],[19.0,98.0],[19.2,98.5],[19.5,98.8],[19.8,98.5],[20.0,98.2],[20.2,97.8],[20.5,97.5],[20.2,97.0]]
-  },
-
-  { name: "Karen State (KNU/KNLA)", label: "EAO (KNU)", color: "#8e44ad", opacity: 0.22,
-    info: "KNU (Karen National Union) controls most of Karen State border areas. SAC holds Hpa-An, Myawaddy corridor (Thailand border trade). Heavy fighting in Mutraw (Papun) district — KNLA stronghold for 70 years.",
-    coords: [[19.2,97.5],[18.9,97.5],[18.5,97.8],[18.2,98.0],[17.8,98.3],[17.5,98.5],[17.2,98.3],[17.0,98.5],[16.8,98.3],[16.5,98.0],[16.2,97.8],[16.0,97.5],[16.2,97.2],[16.5,97.0],[17.0,97.0],[17.5,97.0],[18.0,96.8],[18.5,96.5],[18.8,97.0],[19.0,97.2],[19.2,97.5]]
-  },
-
-  { name: "Mon State (Contested/SAC)", label: "Contested", color: "#f39c12", opacity: 0.18,
-    info: "SAC holds Mawlamyine (capital), Thaton. MNLA (Mon National Liberation Army) active in rural areas. KNU presence near Karen State border. Partial junta control of coastal route.",
-    coords: [[16.2,97.8],[16.5,98.0],[16.8,98.3],[17.0,98.5],[16.8,98.8],[16.5,98.5],[16.2,98.2],[15.8,98.0],[15.5,97.8],[15.2,97.5],[15.0,97.2],[15.2,97.0],[15.5,97.0],[16.0,97.2],[16.2,97.5],[16.2,97.8]]
-  },
-
-  { name: "Tanintharyi (SAC/Contested)", label: "SAC Junta", color: "#c0392b", opacity: 0.18,
-    info: "SAC holds Dawei, Myeik, Kawthaung coastal corridor (Thailand-Myanmar highway). KNU and local PDF active in rural and jungle areas. Gas pipeline corridor to Thailand strategically important.",
-    coords: [[15.5,97.8],[15.8,98.0],[16.2,98.2],[16.5,98.5],[16.2,98.8],[15.8,98.5],[15.5,98.8],[15.0,99.0],[14.5,98.8],[14.0,98.5],[13.5,98.5],[13.0,98.5],[12.8,98.8],[13.0,99.2],[13.5,99.5],[14.0,99.5],[14.5,99.2],[15.0,99.0],[15.5,98.5],[15.8,98.2],[15.5,97.8]]
-  },
-
-  { geoNames: ["ayeyarwady"], name: "Ayeyarwady Delta (SAC)", label: "SAC Junta", color: "#c0392b", opacity: 0.20,
-    info: "SAC controls most of Ayeyarwady Region — Myanmar's rice bowl. Limited PDF resistance in rural delta townships. Key agriculture and fishing economy, less strategic conflict.",
-    coords: [[17.5,94.5],[17.8,94.3],[18.0,94.5],[18.2,94.8],[17.8,95.2],[17.5,95.5],[17.0,95.8],[16.5,96.0],[16.2,96.2],[15.8,96.5],[15.5,96.2],[15.8,95.8],[16.2,95.5],[16.5,95.2],[17.0,94.8],[17.5,94.5]]
-  },
-
-];
-
-const CAPTURE_KEYWORDS = {
-  captured:   { color: '#ff453a', label: 'Captured' },
-  seized:     { color: '#ff453a', label: 'Seized' },
-  'fell to':  { color: '#ff453a', label: 'Fell to' },
-  'taken by': { color: '#ff453a', label: 'Taken by' },
-  offensive:  { color: '#ff9f0a', label: 'Offensive' },
-  'under siege':{ color: '#ff9f0a', label: 'Under siege' },
-  blockade:   { color: '#ff9f0a', label: 'Blockaded' },
-  'pushed back':{ color: '#30d158', label: 'Pushed back' },
-  recaptured: { color: '#30d158', label: 'Recaptured' },
-  liberated:  { color: '#30d158', label: 'Liberated' },
-};
-
 const zonesLayerGroup  = L.layerGroup();
 const hotspotLayerGroup = L.layerGroup();
 let zonesVisible = false;
 
-const LOCATION_TO_ADM1 = {
-  'Naypyidaw':    'Naypyidaw',
-  'Yangon':       'Yangon',
-  'Mandalay':     'Mandalay',
-  'Chin State':   'Chin',
-  'Sagaing':      'Sagaing',
-  'Kayah State':  'Kayah',
-  'Rakhine State':'Rakhine',
-  'Shan State':   'Shan',
-  'Kachin State': 'Kachin',
-  'Karen State':  'Kayin',
-  'Bago':         'Bago',
-  'Magway':       'Magway',
-  'Ayeyarwady':   'Ayeyarwady',
-  'Myanmar':      null, // skip generic
-  'Myitkyina':    'Kachin',   'Bhamo':       'Kachin',
-  'Monywa':       'Sagaing',  'Shwebo':      'Sagaing',
-  'Kalay':        'Sagaing',  'Tamu':        'Sagaing',
-  'Hakha':        'Chin',     'Falam':       'Chin',
-  'Sittwe':       'Rakhine',  'Maungdaw':    'Rakhine',  'Kyaukphyu':  'Rakhine',
-  'Pyin Oo Lwin': 'Mandalay', 'Meiktila':    'Mandalay',
-  'Pakokku':      'Magway',   'Minbu':       'Magway',
-  'Taungoo':      'Bago',     'Pyay':        'Bago',
-  'Thanlyin':     'Yangon',
-  'Lashio':       'Shan',     'Taunggyi':    'Shan',
-  'Kengtung':     'Shan',     'Muse':        'Shan',
-  'Hsipaw':       'Shan',     'Kutkai':      'Shan',
-  'Kokang':       'Shan',     'Wa State':    'Shan',     'Mong La':    'Shan',
-  'Loikaw':       'Kayah',
-  'Hpa-An':       'Kayin',    'Myawaddy':    'Kayin',
-  'Mawlamyine':   'Mon',
-  'Dawei':        'Tanintharyi','Myeik':     'Tanintharyi',
-  'Pathein':      'Ayeyarwady','Hinthada':   'Ayeyarwady',
-};
-
-const ACTOR_KEYWORDS = {
-  junta:      'sac', tatmadaw: 'sac', 'military council': 'sac', sac: 'sac',
-  'min aung hlaing': 'sac', 'air strike': 'sac', 'airstrike': 'sac', 'bombing': 'sac',
-  pdf:        'resistance', "people's defence": 'resistance', nug: 'resistance',
-  kia:        'eao', 'kachin independence': 'eao',
-  'arakan army': 'eao', 'aa ': 'eao',
-  mndaa:      'eao', kokang: 'eao', 'three brotherhood': 'eao',
-  tnla:       'eao', "ta'ang": 'eao',
-  knu:        'eao', knla: 'eao', karen: 'eao',
-  kndf:       'eao', karenni: 'eao',
-  cnf:        'eao', chin: 'eao',
-  uwsa:       'eao', 'wa state': 'eao',
-  fighting:   'contested', battle: 'contested', clashes: 'contested',
-  offensive:  'contested', siege: 'contested', blockade: 'contested',
-};
-
-const ACTOR_CFG = {
-  sac:       { color: '#c0392b', label: 'SAC / Tatmadaw',     opacity: 0.22 },
-  resistance:{ color: '#27ae60', label: 'PDF / Résistance',   opacity: 0.22 },
-  eao:       { color: '#8e44ad', label: 'EAO',                opacity: 0.22 },
-  contested: { color: '#f39c12', label: 'Contesté',           opacity: 0.18, dash: '6,5' },
-  unknown:   { color: '#3a3a3c', label: 'Aucune donnée RSS',  opacity: 0.10 },
-};
-
-const KW_WEIGHTS = {
-  captured: 3, seized: 3, 'fell to': 3, 'taken by': 3,
-  controls: 2, 'holds': 2, liberated: 2, recaptured: 2,
-  offensive: 1, fighting: 1, battle: 1, clashes: 1,
-  'pushed back': 1, attack: 1,
-};
-
-let _zonesGeoLayer = null;
-let _zonesGeojsonData = null; // cached GeoJSON
-
-let _regionScores = {};
-
-const _TEXT_TO_ADM1 = [
-  { re: /kachin|myitkyina|bhamo/i,                         adm1: 'Kachin'      },
-  { re: /sagaing|monywa|shwebo|tamu|kalay|\bpale\b/i,    adm1: 'Sagaing'     },
-  { re: /chin state|hakha|falam|tedim|mindat/i,             adm1: 'Chin'        },
-  { re: /rakhine|arakan|sittwe|maungdaw|kyaukphyu/i,        adm1: 'Rakhine'     },
-  { re: /mandalay|pyin oo lwin|meiktila|kyaukse/i,          adm1: 'Mandalay'    },
-  { re: /magway|pakokku|minbu|gangaw/i,                     adm1: 'Magway'      },
-  { re: /\bbago\b|taungoo|pyay|toungoo/i,                 adm1: 'Bago'        },
-  { re: /naypyidaw|nay pyi taw/i,                           adm1: 'Naypyidaw'   },
-  { re: /\byangun\b|\byangon\b|rangoon/i,               adm1: 'Yangon'      },
-  { re: /shan state|lashio|taunggyi|kengtung|muse|hsipaw|kutkai|kokang|wa state|mong la/i, adm1: 'Shan' },
-  { re: /kayah|karenni|loikaw/i,                            adm1: 'Kayah'       },
-  { re: /karen state|kayin|hpa.an|myawaddy|kawkareik/i,     adm1: 'Kayin'       },
-  { re: /\bmon state\b|mawlamyine|thaton/i,               adm1: 'Mon'         },
-  { re: /tanintharyi|dawei|myeik|mergui/i,                  adm1: 'Tanintharyi' },
-  { re: /ayeyarwady|irrawaddy delta|pathein|hinthada/i,     adm1: 'Ayeyarwady'  },
-];
-
-function computeRegionScores() {
-  _regionScores = {};
-  const pool = allArticlesPool.length > 0 ? allArticlesPool : articles;
-  const cutoff = new Date(Date.now() - 90 * 24 * 3600 * 1000);
-
-  pool.forEach(a => {
-    if (!Number.isFinite(a._ts) || a._ts < cutoff.getTime() || a._ts > Date.now()) return;
-    const text = ((a.title || '') + ' ' + (a.description || ''));
-
-    const matchedRegions = new Set();
-    for (const { re, adm1 } of _TEXT_TO_ADM1) {
-      if (re.test(text)) matchedRegions.add(adm1);
-    }
-    if (matchedRegions.size === 0 && a.location) {
-      const adm1 = LOCATION_TO_ADM1[a.location];
-      if (adm1) matchedRegions.add(adm1);
-    }
-    if (matchedRegions.size === 0) return;
-
-    const t = text.toLowerCase();
-
-    let actor = null;
-    let weight = 1;
-    if (/kia|kachin independence|arakan army|mndaa|kokang|tnla|ta.ang|knu|knla|kndf|karenni|cnf|uwsa|wa state|three brotherhood/i.test(text)) {
-      actor = 'eao'; weight = 2;
-    } else if (/pdf|people.s defen[cs]e|nug|resistance force|cdm/i.test(text)) {
-      actor = 'resistance'; weight = 2;
-    } else if (/tatmadaw|sac|military council|junta|min aung hlaing|air.?strike|airstrike|bombing|shelling/i.test(text)) {
-      actor = 'sac'; weight = 2;
-    } else if (/fighting|battle|clash|offensive|siege|blockade|captured|seized|fell to|taken by|liberated|recaptured/i.test(text)) {
-      actor = 'contested'; weight = 1;
-    } else {
-      actor = 'contested'; weight = 1; // any article mentioning the region = contested signal
-    }
-
-    if (/captured|seized|fell to|taken by|controls|liberated|overran/i.test(text)) weight = 3;
-
-    matchedRegions.forEach(adm1 => {
-      if (!_regionScores[adm1]) _regionScores[adm1] = { sac:0, resistance:0, eao:0, contested:0, articles:[] };
-      _regionScores[adm1][actor] += weight;
-      if (_regionScores[adm1].articles.length < 5)
-        _regionScores[adm1].articles.push({ title: a.title, source: a.source, date: a.date, actor, weight });
-    });
-  });
-}
-
-function getRegionControl(adm1) {
-  const s = _regionScores[adm1];
-  if (!s) return 'unknown';
-  const { sac, resistance, eao, contested } = s;
-  const total = sac + resistance + eao + contested;
-  if (total === 0) return 'unknown';
-
-  const top = Math.max(sac, resistance, eao);
-  if (contested > top * 0.6) return 'contested';
-  if (sac       >= resistance && sac       >= eao) return 'sac';
-  if (eao       >= resistance && eao       >= sac)  return 'eao';
-  return 'resistance';
-}
-
-const _GEO_TO_SCORE_KEY = {
-  'ayeyarwady': 'Ayeyarwady', 'bago': 'Bago', 'chin': 'Chin',
-  'kachin': 'Kachin', 'kayah': 'Kayah', 'kayin': 'Kayin',
-  'magway': 'Magway', 'mandalay': 'Mandalay', 'mon': 'Mon',
-  'naypyidaw': 'Naypyidaw', 'rakhine': 'Rakhine', 'sagaing': 'Sagaing',
-  'shan': 'Shan', 'tanintharyi': 'Tanintharyi', 'yangon': 'Yangon',
-};
-function _resolveADM1(shapeName) {
-  if (!shapeName) return shapeName;
-  const key = shapeName.toLowerCase().trim();
-  if (_GEO_TO_SCORE_KEY[key]) return _GEO_TO_SCORE_KEY[key];
-  for (const [k, v] of Object.entries(_GEO_TO_SCORE_KEY)) {
-    if (key.includes(k)) return v;
-  }
-  return shapeName; // fallback: return as-is
-}
-
+// A headline is evidence of reporting, never proof of territorial control.
+const TERRITORIAL_REPORTS = [{
+  location: 'Shan State', date: '2026-09-30',
+  title: 'KIA-led forces reportedly recaptured Shwe Myintin near Mongmit',
+  description: 'The Irrawaddy reports a hilltop base changed hands. This does not establish control of Mongmit town or Shan State.',
+  url: 'https://www.irrawaddy.com/news/war-against-the-junta/kia-recaptures-regime-stronghold-controlling-northern-supply-route.html'
+}];
 function buildBaselineZones() {
-  computeRegionScores();
-
-  const renderZones = (geojson) => {
-    const totalArticles = Object.values(_regionScores).reduce((s,r) => s + r.articles.length, 0);
-    const el = document.getElementById('zones-hotspot-count');
-    if (el) el.textContent = totalArticles > 0 ? ` · ${totalArticles} articles RSS` : ' · chargement…';
-
-    if (_zonesGeoLayer) {
-      map.removeLayer(_zonesGeoLayer);
-      zonesLayerGroup.removeLayer(_zonesGeoLayer);
-    }
-    zonesLayerGroup.clearLayers();
-
-    const STATIC_COLORS = {
-      'Kachin':      { color:'#8e44ad', label:'EAO (KIA)',         opacity:0.25 },
-      'Sagaing':     { color:'#f39c12', label:'Contesté (PDF/SAC)',opacity:0.22 },
-      'Chin':        { color:'#27ae60', label:'Résistance (CNF)',  opacity:0.22 },
-      'Rakhine':     { color:'#8e44ad', label:'EAO (Arakan Army)', opacity:0.25 },
-      'Mandalay':    { color:'#f39c12', label:'Contesté',          opacity:0.20 },
-      'Magway':      { color:'#f39c12', label:'Contesté (PDF/SAC)',opacity:0.20 },
-      'Bago':        { color:'#c0392b', label:'SAC',               opacity:0.18 },
-      'Naypyidaw':   { color:'#c0392b', label:'SAC',               opacity:0.28 },
-      'Yangon':      { color:'#c0392b', label:'SAC',               opacity:0.20 },
-      'Shan':        { color:'#f39c12', label:'Contesté (multi)',  opacity:0.20 },
-      'Kayah':       { color:'#27ae60', label:'Résistance (KNDF)', opacity:0.25 },
-      'Kayin':       { color:'#8e44ad', label:'EAO (KNU)',         opacity:0.22 },
-      'Mon':         { color:'#f39c12', label:'Contesté',          opacity:0.18 },
-      'Tanintharyi': { color:'#c0392b', label:'SAC',               opacity:0.18 },
-      'Ayeyarwady':  { color:'#c0392b', label:'SAC',               opacity:0.18 },
-    };
-
-    _zonesGeoLayer = L.geoJSON(geojson, {
-      style: feature => {
-        const adm1 = _resolveADM1(feature.properties.shapeName || '');
-        const rssControl = getRegionControl(adm1);
-        const cfg = rssControl !== 'unknown'
-          ? (ACTOR_CFG[rssControl] || ACTOR_CFG.unknown)
-          : (STATIC_COLORS[adm1] || { color:'#3a3a3c', opacity:0.15 });
-        return { color: cfg.color, fillColor: cfg.color, fillOpacity: cfg.opacity, weight: 1.5, opacity: 0.85 };
-      },
-      onEachFeature: (feature, layer) => {
-        const adm1 = _resolveADM1(feature.properties.shapeName || '');
-        const rssControl = getRegionControl(adm1);
-        const staticCfg = STATIC_COLORS[adm1] || { color:'#888', label:'Inconnu' };
-        const label = rssControl !== 'unknown'
-          ? (ACTOR_CFG[rssControl]?.label || rssControl)
-          : staticCfg.label;
-        const s = _regionScores[adm1];
-        const scoreHtml = s ? `<div style="font-size:0.52rem;color:rgba(255,255,255,0.4);margin:3px 0;">
-          SAC:${s.sac} EAO:${s.eao} PDF:${s.resistance} Contesté:${s.contested} (${s.articles.length} articles)
-          </div>` : '<div style="font-size:0.52rem;color:rgba(255,255,255,0.3);margin:3px 0;">Baseline statique \u00b7 pas encore d\u2019articles RSS</div>';
-        const recents = s ? s.articles.slice(-3).reverse().map(r =>
-          `<div style="font-size:0.55rem;color:rgba(255,255,255,0.5);line-height:1.4;">• ${escapeHtml((r.title||'').slice(0,65))}…</div>`
-        ).join('') : '';
-        const color = rssControl !== 'unknown' ? (ACTOR_CFG[rssControl]?.color || '#888') : staticCfg.color;
-        layer.bindTooltip(
-          `<div style="font-family:inherit;max-width:280px;">
-            <b style="font-size:0.75rem;color:#fff;">${adm1}</b><br>
-            <span style="display:inline-block;background:${color}22;color:${color};border:0.5px solid ${color};border-radius:3px;padding:1px 5px;font-size:0.55rem;font-weight:700;margin:3px 0;">${label}</span>
-            ${scoreHtml}${recents}
-            <div style="font-size:0.45rem;color:rgba(255,255,255,0.2);margin-top:4px;">Source: flux RSS · mis à jour toutes les 5min</div>
-          </div>`,
-          { sticky: true, className: 'zone-tooltip', direction: 'top', maxWidth: 300 }
-        );
-      }
-    });
-
-    zonesLayerGroup.addLayer(_zonesGeoLayer);
-    zonesLayerGroup.addTo(map); // always add — toggleZones controls visibility via removeLayer
-  };
-
-  if (!_zonesGeojsonData) {
-    _zonesGeojsonData = {"type":"FeatureCollection","features":[{"type":"Feature","properties":{"shapeName":"Kachin"},"geometry":{"type":"Polygon","coordinates":[[[98.9,28.4],[99.5,28.3],[100.1,27.6],[100.3,26.8],[99.8,26.2],[99.5,25.8],[98.8,25.2],[98.2,25.0],[97.6,25.0],[97.2,25.6],[96.8,26.0],[96.5,26.5],[96.2,27.2],[96.0,28.0],[96.5,28.5],[97.5,28.7],[98.2,28.6],[98.9,28.4]]]}},{"type":"Feature","properties":{"shapeName":"Sagaing"},"geometry":{"type":"Polygon","coordinates":[[[96.5,26.5],[96.8,26.0],[97.2,25.6],[97.6,25.0],[98.2,25.0],[98.8,25.2],[99.5,25.8],[99.5,25.0],[99.0,24.2],[98.5,23.5],[98.0,23.0],[97.5,23.2],[97.0,23.5],[96.5,23.8],[96.0,24.0],[95.5,24.5],[95.0,25.0],[94.5,25.5],[94.0,25.8],[93.5,25.5],[93.2,25.0],[93.5,24.5],[94.0,24.0],[94.5,23.5],[94.5,22.5],[94.8,22.0],[95.5,22.0],[96.0,22.5],[96.5,22.8],[97.0,22.5],[97.2,22.0],[97.5,21.5],[97.5,22.5],[97.0,23.0],[97.0,24.0],[96.5,24.5],[96.0,25.0],[96.0,26.0],[96.5,26.5]]]}},{"type":"Feature","properties":{"shapeName":"Chin"},"geometry":{"type":"Polygon","coordinates":[[[94.0,24.0],[94.5,23.5],[94.5,22.5],[94.0,22.0],[93.5,21.5],[93.0,21.5],[92.5,22.0],[92.2,22.5],[92.0,23.0],[92.5,23.5],[93.0,24.0],[93.5,24.5],[94.0,24.0]]]}},{"type":"Feature","properties":{"shapeName":"Rakhine"},"geometry":{"type":"Polygon","coordinates":[[[92.2,22.5],[92.5,22.0],[93.0,21.5],[93.5,21.5],[93.5,21.0],[93.0,20.5],[92.8,20.0],[92.5,19.5],[92.5,18.5],[92.0,18.0],[92.2,17.5],[92.8,17.0],[93.5,17.2],[93.5,18.0],[93.0,18.5],[93.0,19.5],[93.5,20.0],[93.5,20.5],[93.0,21.0],[93.0,21.5],[92.5,22.0],[92.2,22.5]]]}},{"type":"Feature","properties":{"shapeName":"Mandalay"},"geometry":{"type":"Polygon","coordinates":[[[97.5,23.2],[98.0,23.0],[98.5,23.5],[99.0,24.2],[99.5,25.0],[99.5,24.5],[99.0,23.5],[98.8,22.8],[98.5,22.5],[98.0,22.0],[97.5,22.0],[97.0,22.5],[96.5,22.8],[97.0,23.0],[97.5,23.2]]]}},{"type":"Feature","properties":{"shapeName":"Magway"},"geometry":{"type":"Polygon","coordinates":[[[94.5,22.5],[95.0,22.0],[95.5,22.0],[96.0,22.5],[96.5,22.8],[97.0,22.5],[97.2,22.0],[97.5,21.5],[97.0,21.0],[96.5,20.5],[96.0,20.0],[95.5,20.0],[95.0,20.5],[94.8,21.0],[94.5,21.5],[94.5,22.5]]]}},{"type":"Feature","properties":{"shapeName":"Naypyidaw"},"geometry":{"type":"Polygon","coordinates":[[[96.5,20.5],[97.0,21.0],[97.5,21.5],[97.5,20.5],[97.0,19.8],[96.5,19.5],[96.0,19.8],[96.5,20.5]]]}},{"type":"Feature","properties":{"shapeName":"Bago"},"geometry":{"type":"Polygon","coordinates":[[[96.0,20.0],[96.5,20.5],[97.0,21.0],[97.5,21.5],[98.0,21.0],[98.0,20.0],[97.5,19.5],[97.0,18.8],[96.5,18.5],[96.0,18.8],[95.8,19.5],[96.0,20.0]]]}},{"type":"Feature","properties":{"shapeName":"Yangon"},"geometry":{"type":"Polygon","coordinates":[[[96.0,18.0],[96.5,18.5],[97.0,18.8],[97.5,19.5],[97.5,18.5],[97.0,17.5],[96.5,17.2],[96.0,17.0],[95.5,17.5],[95.8,18.0],[96.0,18.0]]]}},{"type":"Feature","properties":{"shapeName":"Ayeyarwady"},"geometry":{"type":"Polygon","coordinates":[[[93.5,17.2],[92.8,17.0],[92.2,17.5],[92.0,16.5],[92.5,16.0],[93.0,15.5],[93.8,15.8],[94.5,16.0],[95.0,16.5],[95.5,17.0],[95.5,17.5],[95.0,18.0],[94.5,18.0],[94.0,18.0],[93.5,18.0],[93.5,17.2]]]}},{"type":"Feature","properties":{"shapeName":"Mon"},"geometry":{"type":"Polygon","coordinates":[[[97.0,17.5],[97.5,18.5],[98.0,18.5],[98.5,18.0],[98.5,16.5],[98.0,16.0],[97.5,16.0],[97.0,16.5],[97.0,17.5]]]}},{"type":"Feature","properties":{"shapeName":"Kayin"},"geometry":{"type":"Polygon","coordinates":[[[97.5,19.5],[98.0,20.0],[98.0,21.0],[98.5,21.0],[99.0,20.5],[99.0,19.5],[98.5,18.5],[98.0,18.5],[97.5,18.5],[97.5,19.5]]]}},{"type":"Feature","properties":{"shapeName":"Kayah"},"geometry":{"type":"Polygon","coordinates":[[[97.5,19.5],[98.0,20.0],[98.5,20.5],[99.0,20.0],[99.0,19.5],[98.5,18.5],[98.0,18.5],[97.5,19.5]]]}},{"type":"Feature","properties":{"shapeName":"Tanintharyi"},"geometry":{"type":"Polygon","coordinates":[[[97.0,16.5],[97.5,16.0],[98.0,16.0],[98.5,16.5],[98.5,15.5],[98.8,14.5],[99.0,13.5],[99.2,12.5],[99.0,11.5],[98.5,11.0],[98.0,11.5],[97.8,12.5],[97.5,13.5],[97.5,14.5],[97.5,15.5],[97.0,16.0],[97.0,16.5]]]}},{"type":"Feature","properties":{"shapeName":"Shan"},"geometry":{"type":"Polygon","coordinates":[[[99.5,25.0],[100.1,24.5],[100.5,23.5],[101.0,22.5],[101.5,22.0],[101.2,21.0],[100.5,20.5],[100.0,20.0],[99.5,20.0],[99.0,19.5],[98.5,18.5],[99.0,19.5],[99.0,20.5],[98.5,21.0],[98.5,22.5],[98.8,22.8],[99.0,23.5],[99.5,24.5],[99.5,25.0]]]}}]};
-  }
-  renderZones(_zonesGeojsonData);
+  zonesLayerGroup.clearLayers();
+  if (zonesVisible) zonesLayerGroup.addTo(map);
 }
-
 function updateHotspots() {
   hotspotLayerGroup.clearLayers();
   if (!zonesVisible) return;
-
-  if (_zonesGeojsonData) {
-    buildBaselineZones(); // recomputes scores + recolors from cached GeoJSON
+  const cutoff = Date.now() - 30 * 86400000;
+  const pool = allArticlesPool.length ? allArticlesPool : articles;
+  const reports = pool.filter(a => a.source === 'The Irrawaddy' && a.location &&
+    Number.isFinite(a._ts) && a._ts >= cutoff && a._ts <= Date.now() &&
+    /captur|recaptur|seiz|offensive|siege|clash|battle|control/i.test(a.title));
+  for (const r of TERRITORIAL_REPORTS) {
+    if (!reports.some(a => a.url === r.url)) reports.push({...r, source:'The Irrawaddy', _ts:Date.parse(r.date)});
   }
-
-  const cutoff = new Date(Date.now() - 90 * 24 * 3600 * 1000);
-  let hotspotCount = 0;
-
-  const pool = allArticlesPool.length > 0 ? allArticlesPool : articles;
-  pool.forEach(a => {
-    if (!Number.isFinite(a._ts) || a._ts < cutoff.getTime() || a._ts > Date.now()) return;
-    const text = ((a.title || '') + ' ' + (a.description || '')).toLowerCase();
-
-    let matchedKw = null;
-    for (const [kw, cfg] of Object.entries(CAPTURE_KEYWORDS)) {
-      if (text.includes(kw)) { matchedKw = { kw, ...cfg }; break; }
-    }
-    if (!matchedKw) return;
-
-    const loc = MYANMAR_LOCATIONS.find(l => l.name === a.location);
-    if (!loc) return;
-
-    hotspotCount++;
-    const ageDays = (Date.now() - new Date(a.date)) / 86400000;
-    const fadeOpacity = ageDays < 7 ? 0.85 : ageDays < 30 ? 0.5 : 0.25;
-    const fadeRadius  = ageDays < 7 ? 12 : ageDays < 30 ? 9 : 7;
-    const circle = L.circleMarker([loc.lat, loc.lng], {
-      radius: fadeRadius, color: matchedKw.color, fillColor: matchedKw.color,
-      fillOpacity: fadeOpacity * 0.3, weight: ageDays < 7 ? 2.5 : 1.5,
-      opacity: fadeOpacity, className: ageDays < 7 ? 'hotspot-pulse' : ''
-    });
-    circle.bindTooltip(
-      `<div style="font-family:inherit;max-width:240px;">
-        <div style="font-size:0.62rem;font-weight:700;color:${matchedKw.color};margin-bottom:3px;">⚡ ${matchedKw.label} — ${escapeHtml(a.location)}</div>
-        <div style="font-size:0.65rem;color:rgba(255,255,255,0.8);line-height:1.4;">${escapeHtml(a.title)}</div>
-        <div style="font-size:0.55rem;color:rgba(255,255,255,.35);margin-top:3px;">${escapeHtml(a.source)} · ${formatRelativeDate(a.date, a.time)}${ageDays > 7 ? ' <span style="opacity:0.5">(older)</span>' : ''}</div>
-      </div>`,
-      { sticky: false, className: 'zone-tooltip', direction: 'top', maxWidth: 260 }
-    );
-    circle.on('click', () => selectArticle(articles.indexOf(a)));
-    hotspotLayerGroup.addLayer(circle);
-  });
-
-  const hsEl = document.getElementById('zones-hotspot-count');
-  if (hsEl) hsEl.textContent = hotspotCount > 0 ? ` · ${hotspotCount} événements récents` : '';
+  // One regional marker gathers reports; coordinates are only a regional reference.
+  const regions = new Map();
+  for (const a of reports) {
+    if (!regions.has(a.location)) regions.set(a.location, []);
+    regions.get(a.location).push(a);
+  }
+  for (const [name, items] of regions) {
+    const loc = MYANMAR_LOCATIONS.find(l => l.name === name);
+    if (!loc) continue;
+    const body = items.map(a => `<p><b>${escapeHtml(a.date)}</b> · ${Date.now()-a._ts > 30*86400000 ? 'Archive' : 'Reported'}<br><a href="${escapeHtml(safeArticleUrl(a.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(a.title)}</a>${a.description ? '<br>'+escapeHtml(a.description) : ''}</p>`).join('');
+    L.circleMarker([loc.lat,loc.lng], {radius:10,color:'#64c8ff',fillOpacity:.15,weight:2})
+      .bindPopup(`<div style="max-width:310px"><b>${escapeHtml(name)} · Territorial reports</b><p>Regional reference only. No verified front line or territorial boundary. Reports may describe different dates and places.</p>${body}<small>Source: The Irrawaddy · curated review 2026-10-13; RSS reports refresh with news.</small></div>`)
+      .addTo(hotspotLayerGroup);
+  }
+  const el = document.getElementById('zones-hotspot-count');
+  if (el) el.textContent = ` · ${reports.length} reports`;
 }
 
 function toggleZones() {
@@ -2171,8 +1802,6 @@ function toggleZones() {
     buildBaselineZones();
     hotspotLayerGroup.addTo(map);
     updateHotspots();
-    setTimeout(() => { if (zonesVisible && _zonesGeojsonData) buildBaselineZones(); }, 3000);
-    setTimeout(() => { if (zonesVisible && _zonesGeojsonData) buildBaselineZones(); }, 8000);
   } else {
     if (map.hasLayer(zonesLayerGroup))   map.removeLayer(zonesLayerGroup);
     if (map.hasLayer(hotspotLayerGroup)) map.removeLayer(hotspotLayerGroup);
@@ -2359,7 +1988,7 @@ MYANMAR_MINES.forEach(mine => {
   });
   const marker = L.marker([mine.lat, mine.lng], { icon });
   const gmUrl = `https://www.google.com/maps?q=${mine.lat},${mine.lng}`;
-  marker.bindPopup(`
+  marker.bindPopup(`<p style="color:#ffcf80">Historical reference · location, control and current activity not reverified.</p>
     <div style="font-family:-apple-system,'Inter',sans-serif;min-width:240px;max-width:300px;">
       <div style="font-weight:700;font-size:0.82rem;margin-bottom:3px;color:#fff;">
         ${cfg.icon} ${mine.name}
@@ -2392,321 +2021,29 @@ function toggleJade() {
   else { map.removeLayer(mineLayerGroup); btn.classList.remove('active'); }
 }
 
-const SCAM_CENTERS = [
-  {
-    name: "KK Park (KK Park 1 & 2)", lat: 16.450, lng: 98.592,
-    operationalStatus: "raided",
-    statusLabel: "RAIDÉ — partiellement démoli, scam bosses relocalisés",
-    statusNote: "Raid SAC oct 2025: 413/635 bâtiments détruits (CIR/Myanmar Witness). Irrawaddy nov 2025: chefs de syndicats déplacés la nuit du raid vers Wankha, Thaepone, Kyauk Khet. PBS déc 2025: opérations reprises dans les composés voisins. Starlink + panneaux solaires contournent les coupures électriques thaïlandaises.",
-    controller: "BGF (Karen Border Guard Force) — Saw Chit Thu, sanctionné OFAC mai 2025, UE, UK",
-    controllerType: "bgf",
-    scale: "~500 acres / ~200 ha. 6 zones. Casinos, hôtels, bordels + scam centers. Victime: Wang Xing (acteur chinois) jan 2025 — viral Weibo, déclencheur du crackdown.",
-    crimes: ["Pig-butchering / crypto fraud", "Romance scams", "Travail forcé / esclavage moderne", "Traite des êtres humains", "Récolte d'organes (documentée, C4ADS 2024)", "Jeux en ligne"],
-    source: "C4ADS oct 2025; PBS/AP déc 2025; Irrawaddy oct-nov 2025; Wikipedia jan 2026"
-  },
-  {
-    name: "Shwe Kokko / Yatai New City", lat: 16.540, lng: 98.600,
-    operationalStatus: "raided",
-    statusLabel: "RAIDÉ — toujours actif (jeux en ligne maintenus)",
-    statusNote: "Raid SAC nov 2025 : ~350 arrêtés. Mekong Eye nov 2025 : fonctionne toujours aux générateurs diesel, 15 km au nord de KK Park. Prévu comme 'smart city', 120 km² planifiés, valorisé 15 Mrd$. Thaïlande a coupé électricité fév 2025 — contourné par diesel.",
-    controller: "BGF (Saw Chit Thu) + Myanmar Yatai International Holding Group (chinois, Jilin Yatai Group)",
-    controllerType: "bgf",
-    scale: "Un des plus grands au monde. Multiples tours de 20+ étages. Sanctionné US OFAC sep 2025 (19 entités/individus).",
-    crimes: ["Pig-butchering", "Travail forcé", "Blanchiment d'argent", "Traite des êtres humains", "Jeux en ligne"],
-    source: "US OFAC sep 2025; Mekong Eye nov 2025; C4ADS oct 2025; Justice for Myanmar 2025"
-  },
-  {
-    name: "Huanya Park", lat: 16.520, lng: 98.620,
-    operationalStatus: "active",
-    statusLabel: "ACTIF — en expansion après KK Park raid",
-    statusNote: "Nikkei jul 2025 : satellites montrent toiture rouge d'un nouveau bâtiment massif presque terminée mars-mai 2025. PBS déc 2025 : travailleurs de KK Park transférés ici (Filipinos, Africains). Justice for Myanmar : KNU a signé contrat foncier 2020 (Mu La Ei Ahlin Co.), renoncé 2022 après révélation des activités criminelles.",
-    controller: "Huanya International Holding Group (chinois) / ex-KNU (contrat résilié 2022) / protection BGF",
-    controllerType: "chinese_syndicate",
-    scale: "Plus petit que KK Park mais en expansion rapide. Nikkei: appareils mobiles détectés circulant entre Huanya, KK Park, Taichang Park — réseau coordonné.",
-    crimes: ["Pig-butchering (ciblant hommes américains âgés)", "Travail forcé", "Romance scams", "Crypto fraud"],
-    source: "Nikkei jul 2025; PBS/Frontline déc 2025; Justice for Myanmar 2025"
-  },
-  {
-    name: "Apollo Park", lat: 16.465, lng: 98.605,
-    operationalStatus: "active",
-    statusLabel: "ACTIF — a absorbé des travailleurs de KK Park",
-    statusNote: "PBS/AP déc 2025 : 200+ travailleurs africains de KK Park transférés vers Apollo après le raid oct 2025. Justice for Myanmar 2025 : identifié dans l'expansion satellitaire 2023-2024. Partie du cluster Myawaddy avec KK Park et Huanya.",
-    controller: "BGF + syndicats chinois",
-    controllerType: "bgf",
-    scale: "Taille moyenne. Actif 2022-présent. Expansion documentée par imagerie satellite Justice for Myanmar.",
-    crimes: ["Pig-butchering", "Travail forcé", "Traite des êtres humains"],
-    source: "PBS/AP déc 2025; Justice for Myanmar 2025"
-  },
-  {
-    name: "Yulong Bay Park", lat: 16.475, lng: 98.595,
-    operationalStatus: "active",
-    statusLabel: "ACTIF",
-    statusNote: "Justice for Myanmar 2025 : expansion extensive documentée par satellite 2023-2024. Partie du cluster central Myawaddy. C4ADS : appareils mobiles tracés entre Yulong Bay et KK Park.",
-    controller: "BGF / syndicats chinois",
-    controllerType: "bgf",
-    scale: "Composé de taille moyenne dans le cluster Myawaddy. Expansion continue post-2021.",
-    crimes: ["Pig-butchering", "Crypto fraud", "Travail forcé"],
-    source: "Justice for Myanmar 2025; C4ADS oct 2025"
-  },
-  {
-    name: "Dongmei Park", lat: 16.510, lng: 98.640,
-    operationalStatus: "active",
-    statusLabel: "ACTIF",
-    statusNote: "C4ADS oct 2025 : appareils mobiles tracés entre Dongmei, Taichang Park et KK Park — coordination confirmée entre sites. Justice for Myanmar : expansion satellite 2023-2024.",
-    controller: "BGF + syndicats chinois",
-    controllerType: "bgf",
-    scale: "Composé moyen, réseau coordonné avec autres sites Myawaddy.",
-    crimes: ["Pig-butchering", "Travail forcé", "Crypto scams"],
-    source: "C4ADS oct 2025; Justice for Myanmar 2025"
-  },
-  {
-    name: "Taichang Park", lat: 16.476, lng: 98.632,
-    operationalStatus: "active",
-    statusLabel: "ACTIF",
-    statusNote: "C4ADS oct 2025 : appareils liés à Dongmei et KK Park. Irrawaddy oct 2025 : scam bosses relocalisés ici après raid KK Park.",
-    controller: "BGF + syndicats chinois",
-    controllerType: "bgf",
-    scale: "Partie du réseau Myawaddy coordonné.",
-    crimes: ["Pig-butchering", "Crypto fraud"],
-    source: "C4ADS oct 2025; Irrawaddy oct 2025"
-  },
-  {
-    name: "Min Let Pan (Minletpan)", lat: 16.420, lng: 98.580,
-    operationalStatus: "expanding",
-    statusLabel: "EN EXPANSION RAPIDE — relocalisation post-KK Park",
-    statusNote: "Mizzima jul 2025 : syndicats evincés de Shwe Kokko relocalisés ici. DKBA et BGF contrôlent conjointement. Justice for Myanmar 2025 : nouveaux composés Min Let Pan identifiés par satellite en 2024, portent toutes les caractéristiques de scam centers. Irrawaddy oct 2025 : scam bosses dirigés vers Min Let Pan après raid.",
-    controller: "DKBA + BGF (contrôle conjoint)",
-    controllerType: "dkba",
-    scale: "En construction rapide. Nouveaux bâtiments identifiés depuis 2024.",
-    crimes: ["Pig-butchering", "Travail forcé", "Traite des êtres humains"],
-    source: "Mizzima jul 2025; Justice for Myanmar 2025; Irrawaddy oct 2025"
-  },
-  {
-    name: "Mitta Lin Myaing / Mae Htaw Thalay (KK 2.0)", lat: 16.400, lng: 98.575,
-    operationalStatus: "expanding",
-    statusLabel: "NOUVEAU — construction 24h/24 depuis oct 2025",
-    statusNote: "Irrawaddy fév 2025 : syndicats expulsés de KK Park relocalisés 8km au sud. 44 nouveaux bâtiments en 4 blocs. Résidents appelé 'KK Park 2.0'. BGF assure le transport des workers et équipements. Menaces de mort contre fuites d'information.",
-    controller: "BGF Brigade 4 (Lt Col Mote Thon, sanctionné UE) + BGF 555 (Bo Shane)",
-    controllerType: "bgf",
-    scale: "Tours de 5 étages en construction continue. Expansion rapide depuis oct 2025.",
-    crimes: ["Pig-butchering", "Travail forcé", "Traite des êtres humains"],
-    source: "Irrawaddy fév-mar 2025; C4ADS oct 2025"
-  },
-  {
-    name: "Kyauk Khet", lat: 16.390, lng: 98.560,
-    operationalStatus: "active",
-    statusLabel: "ACTIF — destination de relocalisation",
-    statusNote: "Mizzima jul 2025 + RFA déc 2024 : gangs de Shwe Kokko relocalisés ici. Irrawaddy oct 2025 : scam bosses dirigés vers Kyauk Khet après raid KK Park (via route DKBA). Sit-in de workers tracés ici par C4ADS.",
-    controller: "DKBA (Democratic Karen Benevolent Army, pro-junta) — contrôle local",
-    controllerType: "dkba",
-    scale: "Plusieurs composés. Croissance rapide 2024-2025.",
-    crimes: ["Pig-butchering", "Travail forcé", "Jeux en ligne"],
-    source: "Mizzima jul 2025; RFA déc 2024; Irrawaddy oct 2025"
-  },
-  {
-    name: "Waw Lay", lat: 16.370, lng: 98.530,
-    operationalStatus: "active",
-    statusLabel: "ACTIF — Deko Park (DKBA)",
-    statusNote: "Mekong Eye nov 2025 : Deko Park à Waw Lay sous direction DKBA. Patrick, 26 ans, Ougandais, décrit conditions : bureau 24/7, dortoirs par département (TikTok, Sales...). Générateurs containerisés anti-bruit. Mizzima jul 2025 : DKBA contrôle Waw Lay.",
-    controller: "DKBA (Democratic Karen Buddhist Army)",
-    controllerType: "dkba",
-    scale: "Deko Park documenté. Conditions de travail forcé documentées par témoins directs.",
-    crimes: ["Romance scams (TikTok)", "Pig-butchering", "Travail forcé", "Traite des êtres humains"],
-    source: "Mekong Eye nov 2025; Mizzima jul 2025"
-  },
-  {
-    name: "Falu", lat: 16.350, lng: 98.510,
-    operationalStatus: "active",
-    statusLabel: "ACTIF — contrôle conjoint DKBA+BGF",
-    statusNote: "Mizzima jul 2025 : DKBA et BGF contrôlent conjointement Falu. Irrawaddy oct 2024 : gangs relocalisés de Shwe Kokko vers Falu dès juillet 2024. RFA : town principale de la nouvelle ceinture de scam au sud de Myawaddy.",
-    controller: "DKBA + BGF (contrôle conjoint)",
-    controllerType: "dkba",
-    scale: "Composé actif depuis mi-2024.",
-    crimes: ["Pig-butchering", "Travail forcé", "Jeux en ligne"],
-    source: "Mizzima jul 2025; Irrawaddy oct 2024; RFA déc 2024"
-  },
-  {
-    name: "Payathonzu (Three Pagodas Pass)", lat: 15.327, lng: 98.418,
-    operationalStatus: "expanding",
-    statusLabel: "EN EXPANSION RAPIDE — nouvelle destination 2024-2025",
-    statusNote: "RFA déc 2024 : gangs de Shan State, Kayin State et Golden Triangle laotien se déplacent ici. Loyers x5. Mizzima jul 2025 : gangs louent terrain au Mont Dhamma Giri pour casinos. Junta forces confined to base (inactive depuis jan 2023). DKBA assure l'administration et sécurité locale depuis mi-2023. NMSP (New Mon State Party) aussi présent.",
-    controller: "DKBA (administration principale depuis mi-2023) + NMSP + Bataillon 97 SAC (confiné en base)",
-    controllerType: "dkba",
-    scale: "Ville-frontière 5h au sud de Myawaddy. Multiple composés en construction. Montée des trafics humains signalée par résidents.",
-    crimes: ["Pig-butchering", "Jeux en ligne", "Traite des êtres humains", "Travail forcé"],
-    source: "RFA déc 2024; Mizzima jul 2025; USIP 2024"
-  },
-  {
-    name: "Laukkai (Kokang)", lat: 23.725, lng: 98.565,
-    operationalStatus: "dismantled",
-    statusLabel: "LARGEMENT DÉMANTELÉ — Op 1027 jan 2024",
-    statusNote: "MNDAA capture Laukkai jan 2024 (Op 1027). 40 000+ personnes rapatriées en Chine. Analyst Jason Tower: 'extremely successful'. Brig. Gen. Zaw Min (ROC Laukkai) emprisonné mars 2024 pour complicité. Syndicats relocalisés vers Karen State et Cambodge. Wikipedia jan 2026: résiduelle activité possible.",
-    controller: "Désormais : MNDAA (Three Brotherhood Alliance). Anciennement : MNA/Kokang BGF + syndicats chinois",
-    controllerType: "mndaa",
-    scale: "Était l'une des plus grandes concentrations mondiales. Dizaines de composés. Maintenant largement vide.",
-    crimes: ["Pig-butchering", "Crypto fraud", "Travail forcé", "Traite des êtres humains (120 000 pers. Myanmar total, UN OHCHR 2023)"],
-    source: "Wikipedia jan 2026; UN OHCHR 2023; MNDAA; USIP 2024; Wikipedia Scam center"
-  },
-  {
-    name: "Mong La SEZ", lat: 21.350, lng: 101.150,
-    operationalStatus: "active",
-    statusLabel: "ACTIF — enclave quasi-autonome",
-    statusNote: "Zone autonome chinoise à la frontière Laos/Chine. NDAA-E (BGF Est de Shan) contrôle. Mizzima 2025 : cité comme 'lawless zone like Laukkai'. UNODC 2023 : hub pour fraudes + trafic d'espèces sauvages + drogues. Wikipedia : victimes contraintes 17h/jour, battements, électrocutions, soins inexistants.",
-    controller: "NDAA-E (National Democratic Alliance Army – Eastern Shan, BGF pro-SAC) — warlord zone",
-    controllerType: "bgf",
-    scale: "Enclave de longue date (années 1990). Fonctionne en parallèle du Golden Triangle laotien (Zhao Wei SEZ).",
-    crimes: ["Romance scams", "Crypto fraud", "Travail forcé", "Traite des êtres humains", "Trafic d'espèces sauvages (économie parallèle)"],
-    source: "Mizzima jul 2025; UNODC 2023; The Diplomat 2023; Wikipedia"
-  },
-];
-
-const SCAM_STATUS_CFG = {
-  active:     { color: '#ff453a', label: 'ACTIF',       pulse: true  },
-  expanding:  { color: '#ff6b00', label: 'EN EXPANSION',pulse: true  },
-  raided:     { color: '#ff9f0a', label: 'RAIDÉ',       pulse: false },
-  relocated:  { color: '#bf5af2', label: 'RELOCALISÉ',  pulse: false },
-  dismantled: { color: '#636366', label: 'DÉMANTELÉ',   pulse: false },
-};
-
-const SCAM_CTRL_CFG = {
-  bgf:              { label: 'BGF (pro-junta)',        color: '#c0392b' },
-  dkba:             { label: 'DKBA (pro-junta)',       color: '#e67e22' },
-  chinese_syndicate:{ label: 'Syndicate chinois',      color: '#8e44ad' },
-  mndaa:            { label: 'MNDAA (résistance)',     color: '#27ae60' },
-};
-
+const SCAM_REPORTS = [{
+  name: 'Myawaddy area · scam industry', lat:16.69, lng:98.50,
+  published:'2026-10-08', reviewed:'2026-10-13',
+  summary:'The Irrawaddy reports continuing scam operations and relocation around Myawaddy following the 2025 demolitions at KK Park and Shwe Kokko. Current occupancy of each compound is not established.',
+  url:'https://www.irrawaddy.com/news/burma/chinese-docuseries-hails-scam-victory-as-myanmar-fraud-empire-rebuilds.html'
+}];
 const scamLayerGroup = L.layerGroup();
 let scamVisible = false;
-
-SCAM_CENTERS.forEach(sc => {
-  const stCfg   = SCAM_STATUS_CFG[sc.operationalStatus] || SCAM_STATUS_CFG.active;
-  const ctrlCfg = SCAM_CTRL_CFG[sc.controllerType] || { label: 'Inconnu', color: '#8e8e93' };
-
-  const icon = L.divIcon({
-    className: '',
-    html: `<div style="position:relative;width:24px;height:24px;">
-      ${stCfg.pulse ? `<div style="position:absolute;inset:0;border-radius:50%;background:${ctrlCfg.color}44;animation:pulse-live 2s ease-in-out infinite;"></div>` : ''}
-      <div style="position:absolute;inset:3px;border-radius:50%;background:${ctrlCfg.color};border:1.5px solid rgba(255,255,255,0.6);display:flex;align-items:center;justify-content:center;font-size:9px;">🕵</div>
-    </div>`,
-    iconSize: [24, 24], iconAnchor: [12, 12]
-  });
-
-  const crimeList = sc.crimes.map(c =>
-    `<span style="display:inline-block;background:rgba(255,69,58,0.1);border:0.5px solid rgba(255,69,58,0.3);border-radius:3px;padding:1px 5px;font-size:0.54rem;margin:1px 2px 1px 0;white-space:nowrap;">${c}</span>`
-  ).join('');
-
-  const marker = L.marker([sc.lat, sc.lng], { icon });
-  marker.bindPopup(`
-    <div style="font-family:-apple-system,'Inter',sans-serif;width:300px;">
-      <div style="font-weight:700;font-size:0.78rem;margin-bottom:4px;color:#fff;">🕵 ${sc.name}</div>
-
-      <div style="display:inline-block;background:${stCfg.color}22;color:${stCfg.color};border:0.5px solid ${stCfg.color};border-radius:3px;padding:1px 7px;font-size:0.58rem;font-weight:700;margin-bottom:5px;">${sc.statusLabel}</div>
-
-      <div style="font-size:0.6rem;color:rgba(255,255,255,0.6);margin-bottom:6px;line-height:1.5;">${sc.statusNote}</div>
-
-      <div style="background:rgba(255,255,255,.04);border-radius:5px;padding:5px 7px;margin-bottom:6px;">
-        <div style="font-size:0.52rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:2px;">Contrôle</div>
-        <span style="display:inline-block;background:${ctrlCfg.color}22;color:${ctrlCfg.color};border:0.5px solid ${ctrlCfg.color};border-radius:3px;padding:1px 5px;font-size:0.55rem;font-weight:700;margin-bottom:3px;">${ctrlCfg.label}</span>
-        <div style="font-size:0.6rem;color:rgba(255,255,255,0.7);line-height:1.4;">${sc.controller}</div>
-      </div>
-
-      <div style="font-size:0.58rem;color:rgba(255,255,255,0.4);margin-bottom:5px;">${sc.scale}</div>
-      <div style="margin-bottom:7px;line-height:1.8;">${crimeList}</div>
-      <div style="font-size:0.5rem;color:rgba(255,255,255,0.2);font-style:italic;">Sources : ${sc.source}</div>
-    </div>
-  `, { maxWidth: 340 });
-
-  scamLayerGroup.addLayer(marker);
-  scamLayerGroup.addLayer(L.marker([sc.lat, sc.lng], {
-    icon: L.divIcon({
-      className: '',
-      html: `<div style="color:${stCfg.color};font-family:'DM Mono',monospace;font-size:0.52rem;white-space:nowrap;margin-top:14px;margin-left:10px;text-shadow:0 0 6px #000,0 0 3px #000;">${sc.name.split('(')[0].trim()}</div>`,
-      iconSize: [0,0], iconAnchor: [0,0]
-    })
-  }));
-});
-
-const _scamActiveFilters = new Set();
-
-function setScamFilter(type, val) {
-  const resetEl = document.getElementById('scam-filter-reset');
-  if (!val) {
-    _scamActiveFilters.clear();
-  } else {
-    if (_scamActiveFilters.has(val)) _scamActiveFilters.delete(val);
-    else _scamActiveFilters.add(val);
-  }
-  if (resetEl) resetEl.style.display = _scamActiveFilters.size > 0 ? 'inline' : 'none';
-  applyScamFilter();
-}
-
 function applyScamFilter() {
-  document.querySelectorAll('.scam-legend-row').forEach(row => {
-    row.classList.remove('scam-filter-active','scam-filter-dimmed');
-    if (_scamActiveFilters.size === 0) return;
-    const isActive = _scamActiveFilters.has(row.dataset.filterVal);
-    row.classList.add(isActive ? 'scam-filter-active' : 'scam-filter-dimmed');
-  });
-
   scamLayerGroup.clearLayers();
-  SCAM_CENTERS.forEach(sc => {
-    const stCfg   = SCAM_STATUS_CFG[sc.operationalStatus] || SCAM_STATUS_CFG.active;
-    const ctrlCfg = SCAM_CTRL_CFG[sc.controllerType] || { label: 'Inconnu', color: '#8e8e93' };
-    const passes  = _scamActiveFilters.size === 0 || _scamActiveFilters.has(sc.controllerType);
-
-    const dimmed  = !passes;
-    const alpha   = dimmed ? '33' : '';
-    const iconColor = stCfg.color + alpha;
-    const scale   = dimmed ? 0.7 : 1;
-
-    const icon = L.divIcon({
-      className: '',
-      html: `<div style="position:relative;width:${24*scale}px;height:${24*scale}px;opacity:${dimmed?0.2:1};transition:opacity 0.2s;">
-        ${stCfg.pulse && !dimmed ? `<div style="position:absolute;inset:0;border-radius:50%;background:${stCfg.color}44;animation:pulse-live 2s ease-in-out infinite;"></div>` : ''}
-        <div style="position:absolute;inset:${3*scale}px;border-radius:50%;background:${stCfg.color};border:${dimmed?'0':'1.5px'} solid rgba(255,255,255,0.6);display:flex;align-items:center;justify-content:center;font-size:${9*scale}px;">🕵</div>
-      </div>`,
-      iconSize: [24*scale, 24*scale], iconAnchor: [12*scale, 12*scale]
-    });
-
-    const crimeList = sc.crimes.map(c =>
-      `<span style="display:inline-block;background:rgba(255,69,58,0.1);border:0.5px solid rgba(255,69,58,0.3);border-radius:3px;padding:1px 5px;font-size:0.54rem;margin:1px 2px 1px 0;white-space:nowrap;">${c}</span>`
-    ).join('');
-
-    const marker = L.marker([sc.lat, sc.lng], { icon });
-    if (!dimmed) {
-      marker.bindPopup(`
-        <div style="font-family:-apple-system,'Inter',sans-serif;width:300px;">
-          <div style="font-weight:700;font-size:0.78rem;margin-bottom:4px;color:#fff;">🕵 ${sc.name}</div>
-          <div style="display:inline-block;background:${stCfg.color}22;color:${stCfg.color};border:0.5px solid ${stCfg.color};border-radius:3px;padding:1px 7px;font-size:0.58rem;font-weight:700;margin-bottom:5px;">${sc.statusLabel}</div>
-          <div style="font-size:0.6rem;color:rgba(255,255,255,0.6);margin-bottom:6px;line-height:1.5;">${sc.statusNote}</div>
-          <div style="background:rgba(255,255,255,.04);border-radius:5px;padding:5px 7px;margin-bottom:6px;">
-            <div style="font-size:0.52rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:2px;">Contrôle</div>
-            <span style="display:inline-block;background:${ctrlCfg.color}22;color:${ctrlCfg.color};border:0.5px solid ${ctrlCfg.color};border-radius:3px;padding:1px 5px;font-size:0.55rem;font-weight:700;margin-bottom:3px;">${ctrlCfg.label}</span>
-            <div style="font-size:0.6rem;color:rgba(255,255,255,0.7);line-height:1.4;">${sc.controller}</div>
-          </div>
-          <div style="font-size:0.58rem;color:rgba(255,255,255,0.4);margin-bottom:5px;">${sc.scale}</div>
-          <div style="margin-bottom:7px;line-height:1.8;">${crimeList}</div>
-          <div style="font-size:0.5rem;color:rgba(255,255,255,0.2);font-style:italic;">Sources : ${sc.source}</div>
-        </div>
-      `, { maxWidth: 340 });
-    }
-
-    scamLayerGroup.addLayer(marker);
-    scamLayerGroup.addLayer(L.marker([sc.lat, sc.lng], {
-      icon: L.divIcon({
-        className: '',
-        html: `<div style="color:${ctrlCfg.color};opacity:${dimmed?0.15:1};font-family:'DM Mono',monospace;font-size:0.52rem;white-space:nowrap;margin-top:14px;margin-left:10px;text-shadow:0 0 6px #000,0 0 3px #000;">${sc.name.split('(')[0].trim()}</div>`,
-        iconSize: [0,0], iconAnchor: [0,0]
-      })
-    }));
+  SCAM_REPORTS.forEach(r => {
+    const historical = Date.now() - Date.parse(r.published) > 30*86400000;
+    L.circleMarker([r.lat,r.lng], {radius:14,color:historical?'#8e8e93':'#ff9f0a',fillOpacity:.15,weight:2})
+      .bindPopup(`<div style="max-width:300px"><b>${escapeHtml(r.name)}</b><p>${historical?'Historical report':'Dated regional report'} · ${escapeHtml(r.published)}</p><p>${escapeHtml(r.summary)}</p><p>Approximate town reference, not a compound location or perimeter. Individual sites and current operators require verification.</p><a href="${escapeHtml(safeArticleUrl(r.url))}" target="_blank" rel="noopener noreferrer">Read The Irrawaddy</a><p>Reviewed ${r.reviewed}</p></div>`)
+      .addTo(scamLayerGroup);
   });
-  if (scamVisible) scamLayerGroup.addTo(map);
 }
 
 function toggleScam() {
   scamVisible = !scamVisible;
   const btn = document.getElementById('btn-scam');
   const legend = document.getElementById('scam-legend');
+  const zonesLeg = document.getElementById('zones-legend');
   if (scamVisible) {
     applyScamFilter();
     scamLayerGroup.addTo(map);
@@ -3507,14 +2844,14 @@ function normalizeArticle(item, feed) {
 }
 function mergeArticles(batches) {
   const urls = new Set(), titles = new Set(), merged = [];
-  for (const {items, feed} of batches) for (const item of items) {
+  for (const {items, feed} of [...batches].sort((a,b) => Number(b.feed.source === 'The Irrawaddy') - Number(a.feed.source === 'The Irrawaddy'))) for (const item of items) {
     const a = normalizeArticle(item, feed);
     if (!a || !matchesKeywords(a)) continue;
     const titleKey = a.title.replace(/\s+[-–|]\s+[^-–|]{1,40}$/, '').toLowerCase();
     if (urls.has(a.url) || titles.has(titleKey)) continue;
     urls.add(a.url); titles.add(titleKey); merged.push(a);
   }
-  return merged.sort((a,b) => (b._ts || 0) - (a._ts || 0));
+  return merged.sort((a,b) => Number(b.source === 'The Irrawaddy') - Number(a.source === 'The Irrawaddy') || (b._ts || 0) - (a._ts || 0));
 }
 
 function detectLocation(text) {
@@ -3685,7 +3022,7 @@ async function fetchNews() {
   }
 
   const rssPromises = feedsToFetch.map(feed =>
-    fetchViaProxy(feed.url, 3500)
+    fetchViaProxy(feed.url, feed.source === 'The Irrawaddy' ? 10000 : 3500)
       .then(xml => ({ status:'fulfilled', value: { feed, items: parseRSSXML(xml, feed) } }))
       .catch(() => ({ status:'rejected' }))
   );
@@ -3734,6 +3071,11 @@ function processResults(rssResults, tgResults = [], rssCount = 0) {
   for (const item of _d1Articles) batches.push({feed: {source:item.source,lang:item.lang,type:item.type},items:[item]});
   articles = mergeArticles(batches);
   allArticlesPool = articles;
+  const primaryStatus = document.getElementById('primary-source-status');
+  const primaryItems = articles.filter(a => a.source === 'The Irrawaddy');
+  if (primaryStatus) primaryStatus.textContent = primaryItems.length
+    ? `The Irrawaddy · primary source · ${primaryItems.length} articles matching keywords · latest ${primaryItems[0].date}. Other sources follow.`
+    : 'The Irrawaddy · no matching articles available. Other sources shown; check languages, keywords or refresh.';
   _briefingCache = null;
   renderFeed();
   updateStats();
@@ -5291,7 +4633,7 @@ var currentLang = 'en';
 var TRANSLATIONS = {
   en: {
     // Header buttons
-    btn_satellite:'SATELLITE', btn_zones:'CONTROL ZONES', btn_mines:'MINES',
+    btn_satellite:'SATELLITE', btn_zones:"TERRITORIAL REPORTS", btn_mines:'MINES',
     btn_scam:'SCAM', btn_transport:'TRANSPORT', btn_military:'MILITARY BASES',
     btn_cities:'LABELS', btn_gt:'GOLDEN TRIANGLE', btn_airstrikes:'AIRSTRIKES',
     tf_24h:'24H', tf_7d:'7 DAYS', tf_30d:'30 DAYS', tf_all:'ALL',
@@ -5308,7 +4650,7 @@ var TRANSLATIONS = {
     // Map stats panel
     stat_events:'Events', stat_medium:'Medium', stat_low_label:'Low', stat_acled:'Historical events',
     // Control zones legend
-    legend_zones:'Control Zones · RSS', legend_zones_sub:'Inferred from RSS · 90 days',
+    legend_zones:"Territorial reports", legend_zones_sub:"The Irrawaddy · regional reference points, not verified control boundaries.",
     legend_sac:'SAC / Tatmadaw', legend_eao:'EAO (KIA · AA · KNU…)',
     legend_pdf:'PDF / Resistance', legend_contested:'Contested',
     legend_nodata:'No RSS data', legend_event:'⚡ Recent event',
@@ -5319,7 +4661,7 @@ var TRANSLATIONS = {
     mil_eao_title:'EAO — Ethnic Armed Groups',
     mil_eao_hq:'HQ / EAO Command', mil_eao_base:'EAO Base',
     // Scam legend
-    legend_scam_title:'Scam Centers', scam_reset:'✕ show all',
+    legend_scam_title:"Scam reports", scam_reset:'✕ show all',
     scam_bgf:'BGF (pro-junta)', scam_dkba:'DKBA (pro-junta)',
     scam_syndicate:'Chinese Syndicate', scam_mndaa:'MNDAA (resistance)',
     // Satellite panel
@@ -5345,18 +4687,18 @@ var TRANSLATIONS = {
     src_gdelt_q:'4 queries: Myanmar military airstrike · Tatmadaw junta attack · Myanmar resistance PDF/Arakan Army · Myanmar civilian killed/bombing',
     src_rw_desc:'Official ReliefWeb API — OCHA humanitarian platform. UNHCR, MSF, IRC, WFP, UNICEF reports. <b>Free, no key.</b>',
     src_rw_item:'20 recent reports filtered on Myanmar. Sources: OCHA, UNHCR, MSF, IRC, WFP, UNICEF…',
-    src_zones_title:'TERRITORIAL CONTROL ZONES',
-    src_zones_desc:'Zones colored dynamically from RSS articles (90-day rolling). Weighted score by actor (SAC/EAO/PDF/Contested). Official borders: geoBoundaries ADM1 (CC BY 4.0).',
-    src_zones_src:'Colors inferred from: Irrawaddy, RFA, Myanmar Now, BBC, Reuters, Al Jazeera, GDELT, ReliefWeb, Google News, Google Alerts',
-    src_zones_algo:'Algorithm: keyword-weighted score (captured=3pts, controls=2pts, fighting=1pt…) over 90 days. Dominant actor → region color.',
+    src_zones_title:"TERRITORIAL REPORTS",
+    src_zones_desc:"Dated Irrawaddy reports at regional reference points. No inferred control boundaries.",
+    src_zones_src:"Primary source: The Irrawaddy. Open map reports for article links and dates.",
+    src_zones_algo:"RSS headlines identify reports to read; they do not establish who controls a region. Curated review: 2026-10-13.",
     src_mines_title:'MINES & RESOURCES (18 sites)',
-    src_mines_desc:'18 documented mining sites (jade, ruby, rare earths, gold, copper) with precise GPS coordinates.',
-    src_scam_title:'SCAM CENTERS (15 sites)',
-    src_scam_desc:'15 documented sites. Operational data current as of January 2026.',
+    src_mines_desc:"Historical mining reference points. Coordinates, ownership and operating status require verification; not a current operational inventory.",
+    src_scam_title:"SCAM INDUSTRY · REGIONAL REPORTS",
+    src_scam_desc:"Myawaddy: Irrawaddy report published 2026-10-08. Reviewed 2026-10-13. Individual compound coordinates and current status unverified.",
     src_mil_title:'MILITARY BASES (31 entries)',
-    src_mil_desc:'22 SAC/Tatmadaw installations + 9 EAO HQs. Individually sourced data.',
+    src_mil_desc:"Historical installation references. Current occupancy, operator and exact location not reverified.",
     src_sat_title:'SATELLITE IMAGERY (10 zones)',
-    src_sat_desc:'10 tension zones with direct access to recent satellite images via Esri World Imagery.',
+    src_sat_desc:'10 tension zones with access to satellite basemaps (capture dates vary; not live imagery) via Esri World Imagery.',
     src_gt_title:'GOLDEN TRIANGLE',
     src_gt_desc:'Polygon based on Sop Ruak tripoint (Mekong/Ruak confluence, 20.35°N 100.09°E). Area ~200,000 km².',
     src_tech_title:'TECHNICAL INFRASTRUCTURE',
@@ -5382,7 +4724,7 @@ var TRANSLATIONS = {
     media_sub1:'Independent Myanmar News', media_sub2:'Analysis & Search',
   },
   fr: {
-    btn_satellite:'SATELLITE', btn_zones:'ZONES DE CONTRÔLE', btn_mines:'MINES',
+    btn_satellite:'SATELLITE', btn_zones:"SITUATION TERRITORIALE", btn_mines:'MINES',
     btn_scam:'SCAM', btn_transport:'TRANSPORT', btn_military:'BASES MILITAIRES',
     btn_cities:'LABELS', btn_gt:'TRIANGLE D\u2019OR', btn_airstrikes:'FRAPPES AÉRIENNES',
     tf_24h:'24H', tf_7d:'7 JOURS', tf_30d:'30 JOURS', tf_all:'TOUT',
@@ -5396,7 +4738,7 @@ var TRANSLATIONS = {
     briefing_concentrated:' concentrés en ', briefing_notably:' notamment en ', briefing_in:' en ',
     stat_high:'Élevé', stat_med:'Mod.', stat_low:'Bas',
     stat_events:'Événements', stat_medium:'Moyen', stat_low_label:'Bas', stat_acled:'Événements historiques',
-    legend_zones:'Contrôle territorial · RSS', legend_zones_sub:'Déduit des flux RSS · 90 jours',
+    legend_zones:"Signalements territoriaux", legend_zones_sub:"The Irrawaddy · repères régionaux, limites de contrôle non vérifiées.",
     legend_sac:'SAC / Tatmadaw', legend_eao:'EAO (KIA · AA · KNU…)',
     legend_pdf:'PDF / Résistance', legend_contested:'Contesté',
     legend_nodata:'Aucune donnée RSS', legend_event:'⚡ Événement récent',
@@ -5405,7 +4747,7 @@ var TRANSLATIONS = {
     mil_airbase:'Base Aérienne', mil_base:'Base / Garnison',
     mil_eao_title:'EAO — Groupes Armés Ethniques',
     mil_eao_hq:'QG / État-Major EAO', mil_eao_base:'Base EAO',
-    legend_scam_title:'Centres d\u2019Escroquerie', scam_reset:'✕ tout afficher',
+    legend_scam_title:"Signalements d’arnaques", scam_reset:'✕ tout afficher',
     scam_bgf:'BGF (pro-junte)', scam_dkba:'DKBA (pro-junte)',
     scam_syndicate:'Syndicat chinois', scam_mndaa:'MNDAA (résistance)',
     sat_title:'Images Satellite — Zones de Tension',
@@ -5429,16 +4771,16 @@ var TRANSLATIONS = {
     src_gdelt_q:'4 requêtes : Myanmar military airstrike · Tatmadaw junta attack · Myanmar resistance PDF/Arakan Army · Myanmar civilian killed/bombing',
     src_rw_desc:'API officielle ReliefWeb — plateforme humanitaire OCHA. Rapports UNHCR, MSF, IRC, WFP, UNICEF. <b>Gratuit, sans clé.</b>',
     src_rw_item:'20 rapports récents filtrés sur Myanmar. Sources : OCHA, UNHCR, MSF, IRC, WFP, UNICEF…',
-    src_zones_title:'ZONES DE CONTRÔLE TERRITORIAL',
-    src_zones_desc:'Zones colorées dynamiquement depuis les articles RSS (90 jours glissants). Score pondéré par acteur (SAC/EAO/PDF/Contesté). Frontières officielles : geoBoundaries ADM1 (CC BY 4.0).',
-    src_zones_src:'Couleurs déduites depuis : Irrawaddy, RFA, Myanmar Now, BBC, Reuters, Al Jazeera, GDELT, ReliefWeb, Google News, Google Alerts',
-    src_zones_algo:'Algorithme : score pondéré par mots-clés (captured=3pts, controls=2pts, fighting=1pt…) sur 90 jours. Acteur dominant → couleur région.',
+    src_zones_title:"SIGNALEMENTS TERRITORIAUX",
+    src_zones_desc:"Articles datés d’Irrawaddy sur des repères régionaux. Aucune frontière de contrôle déduite.",
+    src_zones_src:"Source principale : The Irrawaddy. Liens et dates dans les fiches de la carte.",
+    src_zones_algo:"Les titres RSS signalent des articles à consulter, sans déterminer qui contrôle une région. Revue éditoriale : 2026-10-13.",
     src_mines_title:'MINES & RESSOURCES (18 sites)',
-    src_mines_desc:'18 sites miniers documentés (jade, rubis, terres rares, or, cuivre) avec coordonnées GPS précises.',
-    src_scam_title:'CENTRES D\'ESCROQUERIE (15 sites)',
-    src_scam_desc:'15 sites documentés. Données opérationnelles à jour de janvier 2026.',
+    src_mines_desc:"Repères miniers historiques. Coordonnées, propriétaires et activité à vérifier ; inventaire non actualisé.",
+    src_scam_title:"ARNAQUES · SIGNALEMENTS RÉGIONAUX",
+    src_scam_desc:"Myawaddy : article Irrawaddy du 08/10/2026, examiné le 13/10/2026. Coordonnées et activité actuelle de chaque centre non vérifiées.",
     src_mil_title:'BASES MILITAIRES (31 entrées)',
-    src_mil_desc:'22 installations SAC/Tatmadaw + 9 QG EAO. Données sourcées individuellement.',
+    src_mil_desc:"Repères historiques d’installations. Occupation actuelle, contrôle et position exacte non revérifiés.",
     src_sat_title:'IMAGERIE SATELLITE (10 zones)',
     src_sat_desc:'10 zones de tension avec accès direct aux images satellites récentes via Esri World Imagery.',
     src_gt_title:'TRIANGLE D\'OR',
@@ -5463,7 +4805,7 @@ var TRANSLATIONS = {
     media_sub1:'Médias Myanmar indépendants', media_sub2:'Analyse & Recherche',
   },
   my: {
-    btn_satellite:'ဂြိုလ်တု', btn_zones:'ထိန်းချုပ်ဇုန်', btn_mines:'သတ္တုမိုင်းများ',
+    btn_satellite:'ဂြိုလ်တု', btn_zones:"TERRITORIAL REPORTS", btn_mines:'သတ္တုမိုင်းများ',
     btn_scam:'လိမ်လည်မှု', btn_transport:'သယ်ယူပို့ဆောင်ရေး', btn_military:'စစ်ဘေ့စ်များ',
     btn_cities:'တံဆိပ်များ', btn_gt:'ရွေးကြည်ကြိုး',
     btn_airstrikes:'လေကြောင်းတိုက်ခိုက်မှု',
@@ -5478,7 +4820,7 @@ var TRANSLATIONS = {
     briefing_concentrated:' တွင် အများဆုံး ', briefing_notably:' အထူးသဖြင့် ', briefing_in:' တွင် ',
     stat_high:'မြင့်မား', stat_med:'အလယ်', stat_low:'နိမ့်',
     stat_events:'ဖြစ်ရပ်များ', stat_medium:'အလယ်အလတ်', stat_low_label:'နိမ့်', stat_acled:'သမိုင်းဖြစ်ရပ်များ',
-    legend_zones:'ထိန်းချုပ်ဇုန် · RSS', legend_zones_sub:'RSS မှ ရက် ၉၀ ခန့်မှန်း',
+    legend_zones:"Territorial reports", legend_zones_sub:"The Irrawaddy · regional reference points, not verified control boundaries.",
     legend_sac:'SAC / တပ်မတော်', legend_eao:'EAO (KIA · AA · KNU…)',
     legend_pdf:'PDF / တော်လှန်ရေး', legend_contested:'အငြင်းပွားနေသော',
     legend_nodata:'RSS ဒေတာမရှိ', legend_event:'⚡ မကြာသေးမီဖြစ်ရပ်',
@@ -5487,7 +4829,7 @@ var TRANSLATIONS = {
     mil_airbase:'လေတပ်ဘေ့စ်', mil_base:'ဘေ့စ် / တပ်စခန်း',
     mil_eao_title:'EAO — တိုင်းရင်းသားလက်နက်ကိုင်များ',
     mil_eao_hq:'EAO ဌာနချုပ်', mil_eao_base:'EAO ဘေ့စ်',
-    legend_scam_title:'လိမ်လည်မှုဗဟိုများ', scam_reset:'✕ အားလုံးပြပါ',
+    legend_scam_title:"Scam reports", scam_reset:'✕ အားလုံးပြပါ',
     scam_bgf:'BGF (စစ်အစိုးရဘက်)', scam_dkba:'DKBA (စစ်အစိုးရဘက်)',
     scam_syndicate:'တရုတ်ဝိုင်းဂိုဏ်း', scam_mndaa:'MNDAA (တော်လှန်ရေး)',
     sat_title:'ဂြိုလ်တုဓာတ်ပုံ — တင်းမာမှုဇုန်',
@@ -5511,16 +4853,16 @@ var TRANSLATIONS = {
     src_gdelt_q:'မေးခွန်း ၄ ခု : Myanmar military airstrike · Tatmadaw junta attack · Myanmar resistance PDF/Arakan Army · Myanmar civilian killed',
     src_rw_desc:'တရားဝင် ReliefWeb API — OCHA လူသားချင်းစာနာမှု ပလပ်ဖောင်း။ UNHCR, MSF, IRC, WFP, UNICEF အစီရင်ခံစာများ။ <b>အခမဲ့။</b>',
     src_rw_item:'Myanmar ဆိုင်ရာ မကြာသေးမီ အစီရင်ခံစာ ၂၀ ခု။ အရင်းအမြစ် : OCHA, UNHCR, MSF, IRC, WFP, UNICEF…',
-    src_zones_title:'နယ်မြေထိန်းချုပ်မှုဇုန်များ',
-    src_zones_desc:'RSS ဆောင်းပါးများမှ (ရက် ၉၀ ရွေ့လျားပြတင်းပေါက်) ဇုန်အရောင်ကို အလိုအလျောက်ဆုံးဖြတ်သည်။ တာဝန်ကျသူအလိုက် ဆောင်းပါးများကို ဆင်ခြင်တုံတရားဖြင့် အမှတ်ပေးသည်။',
-    src_zones_src:'အရောင်ကို ဤအရင်းအမြစ်များမှ ခန့်မှန်းသည် : Irrawaddy, RFA, BBC, Reuters, Al Jazeera, GDELT, ReliefWeb, Google News',
-    src_zones_algo:'အယ်လဂိုရီသမ် : ကီးဝပ်အလေးချိန် (captured=3pts, controls=2pts, fighting=1pt…) ရက် ၉၀ ပေါ်မူတည်၍ အနိုင်ရသောတာဝန်ကျသူ → ဒေသအရောင်။',
+    src_zones_title:"TERRITORIAL REPORTS",
+    src_zones_desc:"Dated Irrawaddy reports at regional reference points. No inferred control boundaries.",
+    src_zones_src:"Primary source: The Irrawaddy. Open map reports for article links and dates.",
+    src_zones_algo:"RSS headlines identify reports to read; they do not establish who controls a region. Curated review: 2026-10-13.",
     src_mines_title:'သတ္တုတွင်းများ & သယံဇာတ (၁၈ နေရာ)',
-    src_mines_desc:'သတ္တုတွင်းနေရာ ၁၈ ခု မှတ်တမ်းတင်ထား (ကျောက်မျက်၊ ရတနာ၊ ရှားပါးကြေး၊ ရွှေ၊ ကြေးနီ)။',
-    src_scam_title:'လိမ်လည်မှုဗဟိုများ (၁၅ နေရာ)',
-    src_scam_desc:'မှတ်တမ်းတင်ထားသောနေရာ ၁၅ ခု။ ၂၀၂၆ ဇန်နဝါရီ ဒေတာ။',
+    src_mines_desc:"Historical mining reference points. Coordinates, ownership and operating status require verification; not a current operational inventory.",
+    src_scam_title:"SCAM INDUSTRY · REGIONAL REPORTS",
+    src_scam_desc:"Myawaddy: Irrawaddy report published 2026-10-08. Reviewed 2026-10-13. Individual compound coordinates and current status unverified.",
     src_mil_title:'စစ်ဘေ့စ်များ (ဝင်ခွင့် ၃၁ ခု)',
-    src_mil_desc:'SAC/တပ်မတော် တပ်စခန်း ၂၂ ခု + EAO ဌာနချုပ် ၉ ခု။',
+    src_mil_desc:"Historical installation references. Current occupancy, operator and exact location not reverified.",
     src_sat_title:'ဂြိုလ်တုဓာတ်ပုံ (ဇုန် ၁၀ ခု)',
     src_sat_desc:'Esri World Imagery မှတစ်ဆင့် မကြာသေးမီ ဂြိုလ်တုဓာတ်ပုံများသို့ တိုက်ရိုက်ဝင်ရောက်နိုင်သော တင်းမာမှုဇုန် ၁၀ ခု။',
     src_gt_title:'ရွေးကြည်ကြိုး',
