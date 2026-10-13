@@ -1567,7 +1567,7 @@ const map = L.map('map', {
   center: [19.5, 96.5],
   zoom: 7,
   zoomControl: false,
-  attributionControl: false,
+  attributionControl: true,
   minZoom: 5,
   maxZoom: 13,
   maxBounds: [[9.0, 87.0], [29.5, 106.0]],
@@ -1635,8 +1635,10 @@ gtLayerGroup.addLayer(gtPolygon);
 let gtVisible = false;
 
 const darkLayer = L.tileLayer(
-  'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
-  { subdomains:'abcd', maxZoom:19 }
+  'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png?key=cb1_4j5u_1_65fea01dd67869bb177d7f02',
+  { subdomains:'abcd', maxZoom:19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+  }
 );
 const satelliteLayer = L.tileLayer(
   'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
