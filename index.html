@@ -1069,7 +1069,7 @@
     </div>
     <div class="zones-legend" id="scam-legend">
       <div class="zones-legend-title" data-i18n="legend_scam_title">Scam reports</div>
-      <div style="max-width:240px;font-size:.65rem;line-height:1.5">The Irrawaddy · 2026-10-08<br>Myawaddy area. Individual compound locations and current activity unverified. Orange: recent report; grey: older than 30 days.</div>
+      <div style="max-width:240px;font-size:.65rem;line-height:1.5">The Irrawaddy · automatic RSS reports + dated regional reference. Open markers for dates and links. See SOURCES for reports without a location.</div>
     </div>
 
     <!-- Military bases legend — shown when military layer active -->
@@ -1146,6 +1146,12 @@
   <div class="tv-panel-header"><span>📡 <span data-i18n="src_title">Sources &amp; Transparency</span></span><span onclick="toggleSrcPanel()" style="cursor:pointer;color:var(--text3);font-size:1.1rem;">×</span></div>
   <div style="padding:12px 14px;font-size:0.62rem;color:rgba(255,255,255,.55);line-height:1.7;">
 
+    <div class="src-section">
+      <div class="src-title">AUTOMATIC LAYER UPDATES · IRRAWADDY</div>
+      <div id="layer-evidence-status" role="status">Loading reports…</div>
+      <div class="src-desc">Scam centers, mines and bases: dated reports refresh automatically. Exact site matches update its popup; otherwise a regional marker is used. Unresolved locations stay in this list. Headlines are not independent confirmation; historical inventory stays labelled. Browser history: up to 90 days / 300 reports.</div>
+      <div id="layer-evidence-list" style="font-size:.68rem;line-height:1.5;max-height:300px;overflow:auto"></div>
+    </div>
     <div class="src-section">
       <div class="src-title">⚡ <span data-i18n="src_class_title">EVENT CLASSIFICATION — HIGH / MEDIUM / LOW</span></div>
       <div class="src-desc" data-i18n="src_class_desc">Each RSS article is automatically classified by lexical analysis of the title + description. No ML, no external API — deterministic rules applied at each refresh.</div>
@@ -1975,6 +1981,93 @@ const MINE_TYPE_CFG = {
   chromite:    { icon: '🔲', color: '#98989d' },
 };
 
+// Automatic evidence overlays. Historical inventories are never treated as live intelligence.
+const LAYER_TOPICS = {
+  scam: /\b(?:scam(?:ming)?|fraud|cybercrime|cyber.?scam|KK Park|Shwe Kokko)\b/i,
+  mines: /\b(?:mining|jade|rare earths?|ruby mines?|copper mines?|gold mines?|tin mines?)\b/i,
+  bases: /\b(?:military bases?|airbases?|air bases?|army bases?|military headquarters|military outposts?|battalion headquarters|hilltop bases?|regime strongholds?)\b/i
+};
+const LAYER_ACTIONS = [
+  ['Closure reported', /\b(?:closed|closes|shut down|shuts down|demolished|demolishes|dismantled|dismantles)\b/i],
+  ['Relocation reported', /\b(?:relocated|relocates|relocate|moved|moves|relocation)\b/i],
+  ['Capture / control change reported', /\b(?:captured|captures|recaptured|recaptures|seized|seizes|takes control|taken over)\b/i],
+  ['Opening / resumption reported', /\b(?:reopened|reopens|resumed|resumes|expanded|expands)\b/i],
+  ['Attack / raid reported', /\b(?:raided|raids|attacked|attacks|bombed|bombs)\b/i]
+];
+const layerEvidenceGroups = {scam:L.layerGroup(), mines:L.layerGroup(), bases:L.layerGroup()};
+const layerEvidence = new Map();
+const layerSiteMarkers = {mines:new Map(), bases:new Map()};
+function isIrrawaddyArticle(a) {
+  try { return /^(www\.|burma\.)?irrawaddy\.com$/.test(new URL(a.url).hostname); }
+  catch { return false; }
+}
+function extractLayerEvidence(a, now = Date.now()) {
+  if (!isIrrawaddyArticle(a) || !Number.isFinite(a._ts) || a._ts > now || now-a._ts > 90*86400000) return [];
+  const text = a.title + '. ' + a.description;
+  const uncertain = /\b(?:not|never|denies?|denied|may|might|could|plans?|planned|will|would|if|rumou?r|unconfirmed|alleged)\b|\?/.test(a.title.toLowerCase());
+  const oldEvent = [...a.title.matchAll(/\b(20\d{2})\b/g)].some(m => +m[1] < new Date(a._ts).getUTCFullYear());
+  return Object.entries(LAYER_TOPICS).filter(([,re]) => re.test(text)).map(([kind,re]) => {
+    // Only classify an action if the topic is in the headline too. Excerpts often mix subjects.
+    const actions = !uncertain && !oldEvent && re.test(a.title) ? LAYER_ACTIONS.filter(([,rx]) => rx.test(a.title)) : [];
+    const change = actions.length === 1 ? actions[0][0] : 'Mention — status unconfirmed';
+    const inventory = kind === 'mines' ? MYANMAR_MINES : kind === 'bases' ? MILITARY_BASES : [];
+    // Require a complete site name, never just a shared city or an actor acronym.
+    const matches = inventory.filter(site => hasTerm(a.title,site.name.replace(/\s*\([^)]*\)/g,'').trim()));
+    const site = matches.length === 1 ? matches[0] : null;
+    const region = MYANMAR_LOCATIONS.find(l => l.name === a.location);
+    return {kind, change, title:a.title, description:a.description, url:a.url, date:a.date, ts:a._ts,
+      site:site?.name || null, location:site?.name || region?.name || null,
+      lat:site?.lat ?? region?.lat ?? null, lng:site?.lng ?? region?.lng ?? null,
+      precision:site ? 'Historical site reference; coordinates not reverified' : region ? 'Regional reference; exact site unknown' : 'Location unresolved; not placed on map'};
+  });
+}
+function evidenceHtml(r) {
+  return `<div style="max-width:300px"><b>${escapeHtml(r.change)}</b><p>${escapeHtml(r.title)}</p><p>Published ${escapeHtml(r.date)} · ${escapeHtml(r.precision)}</p><p>Automatically extracted from the RSS headline/excerpt. Event date and current operator are not independently verified. A report does not establish the current status.</p><a href="${escapeHtml(safeArticleUrl(r.url))}" target="_blank" rel="noopener noreferrer">Read The Irrawaddy</a></div>`;
+}
+function updateLayerEvidence(batches = []) {
+  // Work from raw source batches, independently of the reader's news filters.
+  for (const {items,feed} of batches) for (const item of items) {
+    const a = normalizeArticle(item,{...feed,forLayerEvidence:true});
+    if (!a) continue;
+    for (const r of extractLayerEvidence(a)) layerEvidence.set(r.kind+'|'+r.url,r);
+  }
+  const cutoff = Date.now()-90*86400000;
+  for (const [key,r] of layerEvidence) if (r.ts < cutoff || r.ts > Date.now()) layerEvidence.delete(key);
+  const rows = [...layerEvidence.values()].sort((a,b)=>b.ts-a.ts).slice(0,300);
+  layerEvidence.clear(); rows.forEach(r=>layerEvidence.set(r.kind+'|'+r.url,r));
+  try { localStorage.setItem('mw-layer-evidence-v1',JSON.stringify(rows)); } catch { /* storage optional */ }
+  for (const group of Object.values(layerEvidenceGroups)) group.clearLayers();
+  for (const markers of Object.values(layerSiteMarkers)) for (const ref of markers.values()) ref.marker.setPopupContent(ref.original);
+  const grouped = new Map();
+  for (const r of rows) {
+    if (r.lat === null || !Number.isFinite(r.lat) || !Number.isFinite(r.lng)) continue;
+    const key = r.kind+'|'+r.location;
+    if (!grouped.has(key)) grouped.set(key,[]);
+    grouped.get(key).push(r);
+  }
+  for (const reports of grouped.values()) {
+    const r = reports[0];
+    const body = `<b>${escapeHtml(r.location)}</b>` + reports.slice(0,5).map(evidenceHtml).join('<hr>');
+    const ref = r.site && layerSiteMarkers[r.kind]?.get(r.site);
+    if (ref) ref.marker.setPopupContent(body+'<hr>'+ref.original);
+    else L.circleMarker([r.lat,r.lng],{radius:11,color:r.kind==='scam'?'#ff9f0a':r.kind==='mines'?'#bf5af2':'#64c8ff',weight:2,fillOpacity:.18})
+      .bindPopup(body,{maxWidth:340}).addTo(layerEvidenceGroups[r.kind]);
+  }
+  const panel = document.getElementById('layer-evidence-list');
+  if (panel) panel.innerHTML = rows.length ? rows.map(r=>`<details style="margin:6px 0"><summary>${escapeHtml(r.kind)} · ${escapeHtml(r.date)} · ${escapeHtml(r.location || 'Location unresolved')}</summary>${evidenceHtml(r)}</details>`).join('') : 'No matching Irrawaddy reports retrieved yet. Historical references remain unverified.';
+  const status = document.getElementById('layer-evidence-status');
+  if (status) status.textContent = `${rows.length} reports · automatic scan every 5 min while this page is open · last scan ${new Date().toISOString().slice(11,16)} UTC`;
+}
+function restoreLayerEvidence() {
+  try {
+    const stored = JSON.parse(localStorage.getItem('mw-layer-evidence-v1') || '[]');
+    if (!Array.isArray(stored)) return;
+    // Re-extract from text; never trust stored coordinates, status or markup.
+    const batches = stored.slice(0,300).map(r=>({feed:{source:'The Irrawaddy'},items:[{title:r.title,description:r.description,link:r.url,pubDate:r.date}]}));
+    updateLayerEvidence(batches);
+  } catch { /* corrupt or unavailable storage must not stop the map */ }
+}
+
 MYANMAR_MINES.forEach(mine => {
   const cfg = MINE_TYPE_CFG[mine.type] || { icon: '⛏', color: '#ffffff' };
   const mineralList = mine.minerals.map(m =>
@@ -2003,6 +2096,7 @@ MYANMAR_MINES.forEach(mine => {
       </div>
     </div>
   `, { maxWidth: 320 });
+  layerSiteMarkers.mines.set(mine.name,{marker,original:marker.getPopup().getContent()});
   mineLayerGroup.addLayer(marker);
 
   mineLayerGroup.addLayer(L.marker([mine.lat, mine.lng], {
@@ -2013,6 +2107,8 @@ MYANMAR_MINES.forEach(mine => {
     })
   }));
 });
+
+mineLayerGroup.addLayer(layerEvidenceGroups.mines);
 
 function toggleJade() {
   mineVisible = !mineVisible;
@@ -2031,6 +2127,7 @@ const scamLayerGroup = L.layerGroup();
 let scamVisible = false;
 function applyScamFilter() {
   scamLayerGroup.clearLayers();
+  scamLayerGroup.addLayer(layerEvidenceGroups.scam);
   SCAM_REPORTS.forEach(r => {
     const historical = Date.now() - Date.parse(r.published) > 30*86400000;
     L.circleMarker([r.lat,r.lng], {radius:14,color:historical?'#8e8e93':'#ff9f0a',fillOpacity:.15,weight:2})
@@ -2619,7 +2716,7 @@ MILITARY_BASES.forEach(base => {
     ? '<div style="font-size:0.6rem;color:rgba(255,255,255,.35);margin-bottom:6px;"><span style="color:rgba(255,255,255,0.5);font-weight:600;">Effectifs ·</span> ' + base.strength + '</div>'
     : '';
 
-  const popupHtml = '<div style="font-family:inherit;min-width:240px;max-width:300px;">'
+  const popupHtml = '<p>Historical inventory · current status and operator unverified.</p><div style="font-family:inherit;min-width:240px;max-width:300px;">'
     + '<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;">'
     + '<div style="font-size:20px;line-height:1;margin-top:1px;">' + symbol + '</div>'
     + '<div><div style="font-weight:700;font-size:0.85rem;color:#fff;line-height:1.3;">' + base.name + '</div>'
@@ -2637,6 +2734,7 @@ MILITARY_BASES.forEach(base => {
     + '</div>';
 
   marker.bindPopup(popupHtml, { className: 'map-popup-leaflet', maxWidth: 310 });
+  layerSiteMarkers.bases.set(base.name,{marker,original:marker.getPopup().getContent()});
   militaryLayerGroup.addLayer(marker);
 });
 
@@ -2653,6 +2751,8 @@ function _stackMilLegend() {
   milLeg.style.right = '14px';
   milLeg.style.left  = 'auto';
 }
+
+militaryLayerGroup.addLayer(layerEvidenceGroups.bases);
 
 function toggleMilitary() {
   militaryVisible = !militaryVisible;
@@ -2832,7 +2932,7 @@ function normalizeArticle(item, feed) {
   const combined = title + ' ' + description;
   const aggregated = ['gnews','gdelt'].includes(feed.type) || /🔔|🔍|🌐|google|gdelt/i.test(feed.source || item.source || '');
   // Aggregator excerpts can include unrelated recommendation links.
-  if (!isMyanmarRelevant(aggregated ? title : combined)) return null;
+  if (!feed.forLayerEvidence && !isMyanmarRelevant(aggregated ? title : combined)) return null;
   const rawDate = item.pubDate || item.published_at || '';
   const ts = rawDate ? Date.parse(rawDate) : NaN;
   const valid = Number.isFinite(ts) && ts <= Date.now();
@@ -3069,6 +3169,7 @@ async function fetchNews() {
 function processResults(rssResults, tgResults = [], rssCount = 0) {
   const batches = [...rssResults, ...tgResults].filter(r => r.status === 'fulfilled' && r.value).map(r => r.value);
   for (const item of _d1Articles) batches.push({feed: {source:item.source,lang:item.lang,type:item.type},items:[item]});
+  updateLayerEvidence(batches);
   articles = mergeArticles(batches);
   allArticlesPool = articles;
   const primaryStatus = document.getElementById('primary-source-status');
@@ -4332,6 +4433,7 @@ async function loadHistoricalEvents() {
 
 // Start fetching immediately — proxy racing happens inside fetchViaProxy
 loadHistoricalEvents().then(() => fetchNews());
+restoreLayerEvidence();
 setInterval(fetchNews, 5 * 60 * 1000);
 // Detect best proxy in background for future requests
 detectFastestProxy();
