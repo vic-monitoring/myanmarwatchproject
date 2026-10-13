@@ -3479,12 +3479,21 @@ function hasTerm(text, term) {
   const escaped = String(term).toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   return new RegExp('(^|[^\\p{L}\\p{N}])' + escaped + '(?=$|[^\\p{L}\\p{N}])', 'iu').test(String(text).toLowerCase());
 }
+function isMyanmarRelevant(text) {
+  const terms = ['myanmar','burma','burmese','tatmadaw','rohingya','arakan army',
+    'kachin independence army','karen national union','min aung hlaing','aung san suu kyi',
+    'rakhine','sagaing','mandalay','yangon','naypyidaw','kayah','karenni','myawaddy',
+    'chin state','shan state','kachin state','karen state','magway','ayeyarwady',
+    'မြန်မာ','စစ်အာဏာသိမ်း'];
+  return terms.some(term => hasTerm(text, term));
+}
 function normalizeArticle(item, feed) {
   const title = plainText(item.title).slice(0, 1000);
   const description = plainText(item.description).slice(0, 300);
   const url = safeArticleUrl(item.link || item.url);
   if (!title || !url) return null;
   const combined = title + ' ' + description;
+  if (!isMyanmarRelevant(combined)) return null;
   const rawDate = item.pubDate || item.published_at || '';
   const ts = rawDate ? Date.parse(rawDate) : NaN;
   const valid = Number.isFinite(ts) && ts <= Date.now();
