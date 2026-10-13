@@ -877,6 +877,9 @@
           <div>
             <div class="hist-section-label" data-i18n="hist_event_types">Event types</div>
             <div style="display:flex;flex-direction:column;gap:2px;">
+<label class="db-type-row checked" data-type="State-based conflict" onclick="toggleDbType(this)" style="display:none"><span class="db-type-label">State-based conflict</span><span class="db-type-count" id="db-count-State-based conflict">—</span></label>
+<label class="db-type-row checked" data-type="Non-state conflict" onclick="toggleDbType(this)" style="display:none"><span class="db-type-label">Non-state conflict</span><span class="db-type-count" id="db-count-Non-state conflict">—</span></label>
+<label class="db-type-row checked" data-type="One-sided violence" onclick="toggleDbType(this)" style="display:none"><span class="db-type-label">One-sided violence</span><span class="db-type-count" id="db-count-One-sided violence">—</span></label>
               <label class="db-type-row checked" data-type="Battles" onclick="toggleDbType(this)">
                 <span class="db-type-dot" style="background:#ff453a;"></span>
                 <span class="db-type-label">⚔ <span data-i18n="hist_battles">Battles</span></span>
@@ -1274,7 +1277,7 @@
       <div class="stat-row"><span class="stat-label" data-i18n="stat_medium">Medium</span><span class="stat-val med" id="stat-med-map">0</span></div>
       <div class="stat-row"><span class="stat-label" data-i18n="stat_low_label">Low</span><span class="stat-val lo" id="stat-low-map">0</span></div>
       <div style="height:0.5px;background:rgba(255,255,255,.08);margin:6px 0;"></div>
-      <div class="stat-row"><span class="stat-label" data-i18n="stat_acled">ACLED events</span><span class="stat-val" id="acled-count" style="color:var(--accent);">—</span></div>
+      <div class="stat-row"><span class="stat-label" data-i18n="stat_acled">Historical events</span><span class="stat-val" id="acled-count" style="color:var(--accent);">—</span></div>
     </div>
 
     <!-- ACLED info banner -->
@@ -1958,7 +1961,7 @@ function computeRegionScores() {
   const cutoff = new Date(Date.now() - 90 * 24 * 3600 * 1000);
 
   pool.forEach(a => {
-    if (a.date && new Date(a.date) < cutoff) return;
+    if (!Number.isFinite(a._ts) || a._ts < cutoff.getTime() || a._ts > Date.now()) return;
     const text = ((a.title || '') + ' ' + (a.description || ''));
 
     const matchedRegions = new Set();
@@ -2082,7 +2085,7 @@ function buildBaselineZones() {
           SAC:${s.sac} EAO:${s.eao} PDF:${s.resistance} Contesté:${s.contested} (${s.articles.length} articles)
           </div>` : '<div style="font-size:0.52rem;color:rgba(255,255,255,0.3);margin:3px 0;">Baseline statique \u00b7 pas encore d\u2019articles RSS</div>';
         const recents = s ? s.articles.slice(-3).reverse().map(r =>
-          `<div style="font-size:0.55rem;color:rgba(255,255,255,0.5);line-height:1.4;">• ${(r.title||'').slice(0,65)}…</div>`
+          `<div style="font-size:0.55rem;color:rgba(255,255,255,0.5);line-height:1.4;">• ${escapeHtml((r.title||'').slice(0,65))}…</div>`
         ).join('') : '';
         const color = rssControl !== 'unknown' ? (ACTOR_CFG[rssControl]?.color || '#888') : staticCfg.color;
         layer.bindTooltip(
@@ -2120,7 +2123,7 @@ function updateHotspots() {
 
   const pool = allArticlesPool.length > 0 ? allArticlesPool : articles;
   pool.forEach(a => {
-    if (new Date(a.date) < cutoff) return;
+    if (!Number.isFinite(a._ts) || a._ts < cutoff.getTime() || a._ts > Date.now()) return;
     const text = ((a.title || '') + ' ' + (a.description || '')).toLowerCase();
 
     let matchedKw = null;
@@ -2143,9 +2146,9 @@ function updateHotspots() {
     });
     circle.bindTooltip(
       `<div style="font-family:inherit;max-width:240px;">
-        <div style="font-size:0.62rem;font-weight:700;color:${matchedKw.color};margin-bottom:3px;">⚡ ${matchedKw.label} — ${a.location}</div>
-        <div style="font-size:0.65rem;color:rgba(255,255,255,0.8);line-height:1.4;">${a.title}</div>
-        <div style="font-size:0.55rem;color:rgba(255,255,255,.35);margin-top:3px;">${a.source} · ${formatRelativeDate(a.date, a.time)}${ageDays > 7 ? ' <span style="opacity:0.5">(older)</span>' : ''}</div>
+        <div style="font-size:0.62rem;font-weight:700;color:${matchedKw.color};margin-bottom:3px;">⚡ ${matchedKw.label} — ${escapeHtml(a.location)}</div>
+        <div style="font-size:0.65rem;color:rgba(255,255,255,0.8);line-height:1.4;">${escapeHtml(a.title)}</div>
+        <div style="font-size:0.55rem;color:rgba(255,255,255,.35);margin-top:3px;">${escapeHtml(a.source)} · ${formatRelativeDate(a.date, a.time)}${ageDays > 7 ? ' <span style="opacity:0.5">(older)</span>' : ''}</div>
       </div>`,
       { sticky: false, className: 'zone-tooltip', direction: 'top', maxWidth: 260 }
     );
@@ -3451,25 +3454,74 @@ function _getLocNamesLower() {
   if (!_locNamesLower) _locNamesLower = MYANMAR_LOCATIONS.map(l => ({ name: l.name, lower: l.name.toLowerCase() }));
   return _locNamesLower;
 }
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function safeArticleUrl(value) {
+  try {
+    const u = new URL(String(value || ''));
+    if (!['https:', 'http:'].includes(u.protocol) || u.username || u.password) return '';
+    u.hash = '';
+    for (const key of [...u.searchParams.keys()]) {
+      if (/^utm_/i.test(key) || ['fbclid','gclid'].includes(key)) u.searchParams.delete(key);
+    }
+    return u.href;
+  } catch { return ''; }
+}
+function plainText(value) {
+  // XML parsing decodes entities without loading images or executing HTML.
+  const text = String(value ?? '').replace(/<[^>]*>/g, '');
+  const xml = new DOMParser().parseFromString('<text>' + text.replace(/&(?!(?:amp|lt|gt|quot|apos|#\d+|#x[\da-f]+);)/gi, '&amp;').replace(/</g, '&lt;') + '</text>', 'text/xml');
+  return (xml.querySelector('parsererror') ? text : xml.documentElement.textContent).replace(/\s+/g, ' ').trim();
+}
+function hasTerm(text, term) {
+  if (/[\u1000-\u109F\uAA60-\uAA7F]/u.test(term)) return String(text).includes(term);
+  const escaped = String(term).toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp('(^|[^\\p{L}\\p{N}])' + escaped + '(?=$|[^\\p{L}\\p{N}])', 'iu').test(String(text).toLowerCase());
+}
+function normalizeArticle(item, feed) {
+  const title = plainText(item.title).slice(0, 1000);
+  const description = plainText(item.description).slice(0, 300);
+  const url = safeArticleUrl(item.link || item.url);
+  if (!title || !url) return null;
+  const combined = title + ' ' + description;
+  const rawDate = item.pubDate || item.published_at || '';
+  const ts = rawDate ? Date.parse(rawDate) : NaN;
+  const valid = Number.isFinite(ts) && ts <= Date.now();
+  return { title, description, url, source: plainText(feed.source || item.source || 'Unknown'),
+    location: detectLocation(combined), severity: detectSeverity(combined),
+    date: valid ? new Date(ts).toISOString().slice(0,10) : '—',
+    time: valid ? new Date(ts).toISOString().slice(11,16) + ' UTC' : null,
+    _ts: valid ? ts : null, lang: feed.lang || 'en', type: feed.type || 'rss' };
+}
+function mergeArticles(batches) {
+  const urls = new Set(), titles = new Set(), merged = [];
+  for (const {items, feed} of batches) for (const item of items) {
+    const a = normalizeArticle(item, feed);
+    if (!a || !matchesKeywords(a)) continue;
+    const titleKey = a.title.replace(/\s+[-–|]\s+[^-–|]{1,40}$/, '').toLowerCase();
+    if (urls.has(a.url) || titles.has(titleKey)) continue;
+    urls.add(a.url); titles.add(titleKey); merged.push(a);
+  }
+  return merged.sort((a,b) => (b._ts || 0) - (a._ts || 0));
+}
+
 function detectLocation(text) {
-  const t = (text || '').toLowerCase();
-  for (const loc of _getLocNamesLower()) {
-    if (t.includes(loc.lower)) return loc.name;
-  }
-  const map2loc = {
-    'rakhine':'Rakhine State','arakan':'Rakhine State',
-    'shan':'Shan State','kachin':'Kachin State',
-    'chin':'Chin State','karen':'Karen State','kayin':'Karen State',
-    'kayah':'Kayah State','karenni':'Kayah State',
-    'sagaing':'Sagaing','mandalay':'Mandalay',
-    'yangon':'Yangon','rangoon':'Yangon',
-    'naypyidaw':'Naypyidaw','bago':'Bago',
-    'magway':'Magway','ayeyarwady':'Ayeyarwady','irrawaddy river':'Ayeyarwady',
+  const t = String(text || '');
+  const aliases = {
+    'Rakhine State':['rakhine','arakan','sittwe','maungdaw','kyaukphyu'],
+    'Shan State':['shan','lashio','taunggyi','kokang'],
+    'Kachin State':['kachin','myitkyina','bhamo'],
+    'Chin State':['chin state','chin','hakha','falam','tedim'],
+    'Kayah State':['kayah','karenni','loikaw'],
+    'Karen State':['karen','kayin','hpa-an','myawaddy'],
+    'Sagaing':['sagaing','monywa','shwebo','kalay'],
+    'Mandalay':['mandalay','meiktila'], 'Yangon':['yangon','rangoon'],
+    'Naypyidaw':['naypyidaw','nay pyi taw'], 'Bago':['bago','taungoo'],
+    'Magway':['magway','pakokku'], 'Ayeyarwady':['ayeyarwady','irrawaddy delta','pathein']
   };
-  for (const [kw, loc] of Object.entries(map2loc)) {
-    if (t.includes(kw)) return loc;
-  }
-  return null;
+  const matches = Object.entries(aliases).filter(([name, words]) => hasTerm(t,name) || words.some(w => hasTerm(t,w)));
+  return matches.length === 1 ? matches[0][0] : null;
 }
 
 function detectSeverity(text) {
@@ -3489,17 +3541,16 @@ function detectSeverity(text) {
     'arrest','sentence','convicted','trial','verdict',
     'flood','earthquake','disease','outbreak'
   ];
-  if (high.some(w => t.includes(w))) return 'high';
-  if (low.some(w => t.includes(w)))  return 'low';
+  if (high.some(w => hasTerm(t, w))) return 'high';
+  if (low.some(w => hasTerm(t, w)))  return 'low';
   return 'medium';
 }
 
 function matchesKeywords(item) {
-  if (item.source && item.source.startsWith('🔔')) return true;
   const activeKws = keywords.filter(k => activeLanguages.has(k.lang)).map(k => k.text.toLowerCase());
   if (activeKws.length === 0) return true;
   const text = ((item.title || '') + ' ' + (item.description || '')).toLowerCase();
-  return activeKws.some(kw => text.includes(kw));
+  return activeKws.some(kw => hasTerm(text, kw));
 }
 
 function stripHtml(html) {
@@ -3511,7 +3562,7 @@ function renderKeywords() {
   const filtered = keywords.filter(k => activeLanguages.has(k.lang));
   container.innerHTML = filtered.map((kw) => `
     <div class="tag active">
-      <span>${kw.text}</span>
+      <span>${escapeHtml(kw.text)}</span>
       <span class="remove" onclick="removeKeyword(${keywords.indexOf(kw)})">×</span>
     </div>
   `).join('');
@@ -3668,95 +3719,20 @@ async function fetchNews() {
 }
 
 function processResults(rssResults, tgResults = [], rssCount = 0) {
-  const results = [...rssResults, ...tgResults];
-  const activeLangs = [...activeLanguages];
-
-  const raw = [];
-  const seenUrls = new Set();
-  const seenTitles = new Set();
-  for (const res of results) {
-    if (res.status !== 'fulfilled' || !res.value) continue;
-    const { feed, items } = res.value;
-    for (const item of items) {
-      const combined = (item.title || '') + ' ' + (item.description || '');
-      const location = detectLocation(combined);
-      if (!location) continue;
-      const itemUrl = item.link || '';
-      if (itemUrl && seenUrls.has(itemUrl)) continue; // dedup URL
-      if (itemUrl) seenUrls.add(itemUrl);
-      // Dedup by normalized title — strip source suffix (e.g. " - DW.com"), use first 80 chars
-      const titleKey = (item.title || '')
-        .replace(/\s*[-–|]\s*[^-–|]{1,30}$/, '') // remove " - Source" suffix
-        .replace(/\s+/g, ' ').trim().slice(0, 80).toLowerCase();
-      if (titleKey.length > 10 && seenTitles.has(titleKey)) continue;
-      if (titleKey.length > 10) seenTitles.add(titleKey);
-      const rawPubDate = item.pubDate || '';
-      const parsedDate = rawPubDate ? new Date(rawPubDate) : null;
-      const validDate  = parsedDate && !isNaN(parsedDate);
-      const dateStr    = validDate
-        ? parsedDate.toISOString().slice(0, 10)           // → "2026-03-04"
-        : '—';
-      const timeStr    = validDate
-        ? parsedDate.toISOString().slice(11, 16) + ' UTC' // → "08:32 UTC"
-        : null;
-      raw.push({
-        title:       item.title || '(no title)',
-        source:      feed.source,
-        date:        dateStr,
-        time:        timeStr,
-        location,
-        severity:    detectSeverity(combined),
-        url:         item.link || '#',
-        description: stripHtml(item.description),
-        lang:        feed.lang,
-        type:        feed.type || 'rss',
-        _ts:         validDate ? parsedDate.getTime() : Date.now(),
-      });
-    }
-  }
-
-  let filtered = raw.filter(a => matchesKeywords(a));
-  if (filtered.length === 0) filtered = raw; // fallback: show all located articles
-
-  filtered.sort((a, b) => {
-    const da = a.date && a.date !== '—' ? new Date(a.date + (a.time ? 'T' + a.time.replace(' UTC','') : '')) : new Date(0);
-    const db = b.date && b.date !== '—' ? new Date(b.date + (b.time ? 'T' + b.time.replace(' UTC','') : '')) : new Date(0);
-    return db - da;
-  });
-  // Final dedup pass on merged array — catch duplicates across feeds
-  const _seenFinal = new Set();
-  filtered = filtered.filter(a => {
-    const tk = (a.title||'').replace(/\s*[-–|]\s*\S+\s*$/, '').replace(/\s+/g,' ').trim().slice(0,80).toLowerCase();
-    if (tk.length > 10 && _seenFinal.has(tk)) return false;
-    if (tk.length > 10) _seenFinal.add(tk);
-    return true;
-  });
-  allArticlesPool = filtered; // uncapped — used by hotspot inference
-
-  // ── Fusionner avec les articles D1 historiques ──
-  if (typeof _d1Articles !== 'undefined' && _d1Articles.length > 0) {
-    const existingLinks = new Set(filtered.map(a => a.link));
-    const d1New = _d1Articles.filter(a => !existingLinks.has(a.link));
-    allArticlesPool = [...filtered, ...d1New];
-  }
-
-  articles = filtered; // no cap
-
+  const batches = [...rssResults, ...tgResults].filter(r => r.status === 'fulfilled' && r.value).map(r => r.value);
+  for (const item of _d1Articles) batches.push({feed: {source:item.source,lang:item.lang,type:item.type},items:[item]});
+  articles = mergeArticles(batches);
+  allArticlesPool = articles;
+  _briefingCache = null;
   renderFeed();
   updateStats();
-  // Throttle expensive map operations — defer 200ms
   clearTimeout(window._mapRenderTimer);
   window._mapRenderTimer = setTimeout(() => {
-    renderMarkers();
-    updateHotspots();
+    renderMarkers(); updateHotspots();
     if (airstrikesVisible) renderAirstrikes();
   }, 200);
-  document.getElementById('last-updated').textContent =
-    `LIVE · ${new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit',timeZone:'Asia/Yangon'})} MMT`;
-
-  if (articles.length === 0) {
-    document.getElementById('news-feed').innerHTML = '<div class="loading-bar">No articles found. Try different keywords.</div>';
-  }
+  const updated = document.getElementById('last-updated');
+  if (updated) updated.textContent = `LIVE · ${new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit',timeZone:'Asia/Yangon'})} MMT`;
 }
 
 function getSourceBadge(a) {
@@ -3814,7 +3790,7 @@ function renderFeed() {
   const gdCount  = visible.filter(a => a.type === 'gdelt').length;
   const rwCount  = visible.filter(a => a.type === 'reliefweb').length;
   const alCount  = visible.filter(a => a.source.startsWith('🔔')).length;
-  const rssCount = visible.length - gnCount - gdCount - rwCount;
+  const rssCount = visible.length - gnCount - gdCount - rwCount - alCount;
   document.getElementById('article-count').textContent = visible.length;
   const countEl = document.getElementById('source-breakdown');
   if (countEl) countEl.textContent =
@@ -3846,15 +3822,15 @@ function renderFeed() {
             border:0.5px solid ${badge.color}40;
             border-radius:3px;padding:1px 5px;
           ">${badge.label}</span>
-          <span class="news-source" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:rgba(255,255,255,0.55);">${srcDisplay}</span>
+          <span class="news-source" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:rgba(255,255,255,0.55);">${escapeHtml(srcDisplay)}</span>
         </span>
         <span style="flex-shrink:0;color:rgba(255,255,255,.45);font-size:0.58rem;">${formatRelativeDate(a.date, a.time)}</span>
       </div>
       <div class="news-title">
-        <span class="severity-dot sev-${a.severity === 'high' ? 'high' : a.severity === 'medium' ? 'med' : 'low'}"></span>${a.title}
+        <span class="severity-dot sev-${a.severity === 'high' ? 'high' : a.severity === 'medium' ? 'med' : 'low'}"></span>${escapeHtml(a.title)}
       </div>
       <div class="news-location" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-        <span>${a.location}</span>
+        <span>${escapeHtml(a.location || (currentLang === 'fr' ? 'Localisation non déterminée' : 'Location undetermined'))}</span>
         <span style="font-size:0.58rem;color:${catColor};font-weight:500;text-transform:uppercase;letter-spacing:0.06em;">${cat}</span>
       </div>
     </div>`;
@@ -3937,8 +3913,8 @@ function renderMarkers() {
             onmouseover="this.style.background='rgba(255,255,255,.04)'" onmouseout="this.style.background=''">
             <div style="width:5px;height:5px;border-radius:50%;background:${color};flex-shrink:0;margin-top:5px;box-shadow:0 0 4px ${color};"></div>
             <div>
-              <div style="font-size:0.68rem;font-weight:500;color:rgba(255,255,255,.85);line-height:1.3;">${a.title}</div>
-              <div style="font-size:0.56rem;color:rgba(255,255,255,.35);margin-top:1px;">${a.source} · ${formatRelativeDate(a.date, a.time)}</div>
+              <div style="font-size:0.68rem;font-weight:500;color:rgba(255,255,255,.85);line-height:1.3;">${escapeHtml(a.title)}</div>
+              <div style="font-size:0.56rem;color:rgba(255,255,255,.35);margin-top:1px;">${escapeHtml(a.source)} · ${formatRelativeDate(a.date, a.time)}</div>
             </div>
           </div>`;
         }).join('');
@@ -3968,15 +3944,17 @@ window._selectFromMap = function(i) {
 };
 
 function selectArticle(i) {
+  if (!articles[i]) return;
   activeArticle = i;
   renderFeed();
   const items = document.querySelectorAll('.news-item');
-  if (items[i]) items[i].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  const visibleIndex = getFilteredArticles().indexOf(articles[i]);
+  if (items[visibleIndex]) items[visibleIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
   const a = articles[i];
   const popup = document.getElementById('map-popup');
   document.getElementById('popup-title').textContent = a.title;
-  document.getElementById('popup-link').href = a.url;
+  document.getElementById('popup-link').href = safeArticleUrl(a.url) || '#';
 
   document.getElementById('popup-loading').style.display = 'none';
   const summaryEl = document.getElementById('popup-summary');
@@ -4003,8 +3981,8 @@ function selectArticle(i) {
           const xBadge = getSourceBadge(x);
           return '<div class="popup-nearby-item" onclick="selectArticle('+xIdx+')">'
             + '<div class="popup-nearby-dot" style="background:' + (sevColor[x.severity]||'var(--accent)') + '"></div>'
-            + '<div><div class="popup-nearby-text">' + x.title.slice(0,80) + (x.title.length>80?'…':'') + '</div>'
-            + '<div class="popup-nearby-src">' + x.source.replace(/^[\p{Emoji}\s]+/u,'').trim() + ' · ' + formatRelativeDate(x.date, x.time) + '</div>'
+            + '<div><div class="popup-nearby-text">' + escapeHtml(x.title.slice(0,80)) + (x.title.length>80?'…':'') + '</div>'
+            + '<div class="popup-nearby-src">' + escapeHtml(x.source.replace(/^[\p{Emoji}\s]+/u,'').trim()) + ' · ' + formatRelativeDate(x.date, x.time) + '</div>'
             + '</div></div>';
         }).join('');
   } else {
@@ -4013,9 +3991,9 @@ function selectArticle(i) {
 
   document.getElementById('popup-source').innerHTML =
     `<span style="font-size:0.46rem;font-weight:700;letter-spacing:0.07em;color:${badge.color};background:${badge.bg};border:0.5px solid ${badge.color}40;border-radius:3px;padding:1px 5px;margin-right:4px;">${badge.label}</span>`
-    + `<span style="color:var(--accent)">${srcDisplay}</span>`
+    + `<span style="color:var(--accent)">${escapeHtml(srcDisplay)}</span>`
     + ` · <span>${a.date}</span>`
-    + ` · <span style="color:rgba(255,255,255,0.6)">${a.location}</span>`
+    + ` · <span style="color:rgba(255,255,255,0.6)">${escapeHtml(a.location)}</span>`
     + (gmNews ? ` · <a href="${gmNews}" target="_blank" style="color:rgba(255,255,255,.35);text-decoration:none;font-size:0.6rem;"
         onclick="event.stopPropagation()">📍 ${loc.lat.toFixed(3)}°N ${loc.lng.toFixed(3)}°E ↗</a>` : '');
 
@@ -4075,7 +4053,7 @@ function detectCategory(article) {
   if (article._cat) return article._cat;
   const text = ((article.title||'') + ' ' + (article.description||'')).toLowerCase();
   for (const [cat, kws] of _catEntries) {
-    if (kws.some(kw => text.includes(kw))) { article._cat = cat; return cat; }
+    if (kws.some(kw => hasTerm(text, kw))) { article._cat = cat; return cat; }
   }
   article._cat = 'general';
   return 'general';
@@ -4088,6 +4066,7 @@ function setCategory(cat) {
   });
   renderFeed();
   renderMarkers();
+  if (airstrikesVisible) renderAirstrikes();
 }
 
 function setTimeFilter(tf) {
@@ -4095,6 +4074,7 @@ function setTimeFilter(tf) {
   document.querySelectorAll('.time-tab').forEach(t => t.classList.toggle('active', t.dataset.tf === tf));
   renderFeed();
   renderMarkers();
+  if (airstrikesVisible) renderAirstrikes();
   updateStats();
 }
 
@@ -4102,8 +4082,8 @@ function applyTimeFilter(arr) {
   if (activeTimeFilter === 'all') return arr;
   const now = Date.now();
   const ms = activeTimeFilter === '24h' ? 86400000 : activeTimeFilter === '7d' ? 604800000 : 2592000000;
-  const filtered = arr.filter(a => a._ts && (now - a._ts) <= ms);
-  return filtered.length > 0 ? filtered : arr;
+  const filtered = arr.filter(a => Number.isFinite(a._ts) && a._ts <= now && (now - a._ts) <= ms);
+  return filtered;
 }
 
 function getFilteredArticles() {
@@ -4164,8 +4144,8 @@ function generateBriefing() {
   }
 
   const now_b = Date.now();
-  let recent = pool.filter(a => a._ts && (now_b - a._ts) <= 86400000);
-  if (recent.length < 5) recent = pool;
+  let recent = pool.filter(a => Number.isFinite(a._ts) && a._ts <= now_b && (now_b - a._ts) <= 86400000);
+  // Keep the 24-hour window even when there are few reports.
 
   const sections = {
     military:     { label:'Military operations', icon:'🔴', color:'#ef5350', items:[] },
@@ -4256,10 +4236,10 @@ function generateBriefing() {
 
     if (sources.length) {
       const srcStr = {
-        en: `Source${sources.length>1?'s':''}: ${sources.join(', ')}`,
-        fr: `Source${sources.length>1?'s':''} : ${sources.join(', ')}`,
-        my: `အရင်းအမြစ်: ${sources.join(', ')}`,
-      }[currentLang] || `Sources: ${sources.join(', ')}`;
+        en: `Source${sources.length>1?'s':''}: ${sources.map(escapeHtml).join(', ')}`,
+        fr: `Source${sources.length>1?'s':''} : ${sources.map(escapeHtml).join(', ')}`,
+        my: `အရင်းအမြစ်: ${sources.map(escapeHtml).join(', ')}`,
+      }[currentLang] || `Sources: ${sources.map(escapeHtml).join(', ')}`;
       text += '. <span style="color:rgba(255,255,255,.35);font-size:0.6rem;">' + srcStr + '</span>';
     } else {
       text += '.';
@@ -4523,7 +4503,11 @@ function renderHistMarkers() {
   });
 }
 
+const UCDP_TYPES = {1:'State-based conflict', 2:'Non-state conflict', 3:'One-sided violence'};
 const ACLED_CONFIG = {
+  'State-based conflict': {color:'#ff453a',icon:'⚔',z:900},
+  'Non-state conflict': {color:'#ff9f0a',icon:'⚔',z:850},
+  'One-sided violence': {color:'#ff2d55',icon:'☠',z:950},
   'Battles':                    { color: '#ff453a', icon: '⚔', z: 900 },
   'Explosions/Remote violence': { color: '#ff9f0a', icon: '💥', z: 850 },
   'Violence against civilians': { color: '#ff2d55', icon: '☠', z: 950 },
@@ -4565,6 +4549,7 @@ function updateDbCounts() {
     if (counts[ev._type] !== undefined) counts[ev._type]++;
   });
 
+  Object.values(UCDP_TYPES).forEach(t => { const el = document.getElementById('db-count-' + t); if (el) el.textContent = counts[t] || 0; });
   document.getElementById('db-count-Battles').textContent   = counts['Battles'] || 0;
   document.getElementById('db-count-Explosions').textContent = counts['Explosions/Remote violence'] || 0;
   document.getElementById('db-count-Violence').textContent   = counts['Violence against civilians'] || 0;
@@ -4635,7 +4620,7 @@ function syncYearInputs() {
 
 function getDbCutoff() {
   const from = dbFromYear ? new Date(dbFromYear, 0, 1)  : null;
-  const to   = dbToYear   ? new Date(dbToYear,   11, 31) : null;
+  const to   = dbToYear   ? new Date(dbToYear,   11, 31, 23, 59, 59, 999) : null;
   return { from, to };
 }
 
@@ -4709,7 +4694,7 @@ function processAcledText(text, filename) {
 
   showAcledBanner(
     `✓ ${rows.length.toLocaleString()} events loaded`,
-    `${filename} · ${hasAcled ? 'ACLED' : 'UCDP'}${dateRange}<br><span style="color:var(--green);font-size:0.6rem;">💾 Cached locally</span>`
+    `${escapeHtml(filename)} · ${hasAcled ? 'ACLED' : 'UCDP'}${dateRange}<br><span style="color:var(--green);font-size:0.6rem;">💾 Cached locally</span>`
   );
   acledLoaded = true;
   const dbControls = document.getElementById('db-controls');
@@ -4725,7 +4710,7 @@ function loadAcledCSV(input) {
   const file = input.files[0];
   if (!file) return;
   setAcledDot('loading');
-  showAcledBanner('Parsing CSV…', `Reading ${file.name}…`);
+  showAcledBanner('Parsing CSV…', `Reading ${escapeHtml(file.name)}…`);
 
   const reader = new FileReader();
   reader.onload = e => {
@@ -4742,7 +4727,7 @@ function loadAcledCSV(input) {
       processAcledText(text, file.name);
     } catch(err) {
       setAcledDot('error');
-      showAcledBanner('⚠️ Parse error', err.message);
+      showAcledBanner('⚠️ Parse error', escapeHtml(err.message));
     }
   };
   reader.onerror = () => { setAcledDot('error'); showAcledBanner('⚠️ Read error', 'Could not read file'); };
@@ -4762,7 +4747,7 @@ function restoreAcledFromStorage() {
     const age   = savedAt ? timeSince(new Date(savedAt)) : '?';
     showAcledBanner(
       `✓ ${count.toLocaleString()} events restored`,
-      `${filename}<br><span style="color:var(--text3);font-size:0.6rem;">Cached ${age} ago · <a href="#" onclick="clearAcledStorage();return false;" style="color:var(--red);">Clear cache</a></span>`
+      `${escapeHtml(filename)}<br><span style="color:var(--text3);font-size:0.6rem;">Cached ${age} ago · <a href="#" onclick="clearAcledStorage();return false;" style="color:var(--red);">Clear cache</a></span>`
     );
   } catch(err) {
     localStorage.removeItem('acled_csv');
@@ -4827,6 +4812,11 @@ function splitCSVLine(line) {
 function buildAcledMarkers(rows, fmt) {
   acledMarkers.clearLayers();
   dbAllEvents = [];
+  dbMinDate = dbMaxDate = null;
+  document.querySelectorAll('.db-type-row').forEach(el => {
+    const ucdp = Object.values(UCDP_TYPES).includes(el.dataset.type);
+    el.style.display = (fmt === 'ucdp' ? ucdp : !ucdp) ? '' : 'none';
+  });
 
   rows.forEach(row => {
     const lat = parseFloat(row.latitude || row.lat || 0);
@@ -4846,10 +4836,11 @@ function buildAcledMarkers(rows, fmt) {
       location   = row.location || row.Location || '—';
       notes      = row.notes || row.Notes || '';
     } else { // UCDP GED
-      const country = row.country || row.country_id || '';
+      const country = String(row.country || '');
       if (country && !country.toLowerCase().includes('myanmar') && !country.toLowerCase().includes('burma')) return;
-      const tv   = parseInt(row.type_of_violence) || 1;
-      evType     = tv === 1 ? 'Battles' : tv === 2 ? 'Violence against civilians' : 'Explosions/Remote violence';
+      const tv   = Number(row.type_of_violence);
+      evType     = UCDP_TYPES[tv];
+      if (!evType) return;
       subType    = row.conflict_name || row.dyad_name || '';
       actor1     = row.side_a || row.actor_a || '—';
       actor2     = row.side_b || row.actor_b || '';
@@ -4874,14 +4865,14 @@ function buildAcledMarkers(rows, fmt) {
     const gmUrl = `https://www.google.com/maps?q=${lat},${lng}`;
     m.bindPopup(`
       <div style="font-family:-apple-system,'Inter',sans-serif;min-width:220px;max-width:290px;">
-        <div style="font-size:0.58rem;font-weight:600;color:${cfg.color};text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px;">${cfg.icon} ${evType}</div>
-        ${subType ? `<div style="font-size:0.67rem;color:rgba(255,255,255,.45);margin-bottom:3px;">${subType}</div>` : ''}
-        <div style="font-weight:600;font-size:0.8rem;margin-bottom:5px;line-height:1.3;">${location} · ${date}</div>
+        <div style="font-size:0.58rem;font-weight:600;color:${cfg.color};text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px;">${cfg.icon} ${escapeHtml(evType)}</div>
+        ${subType ? `<div style="font-size:0.67rem;color:rgba(255,255,255,.45);margin-bottom:3px;">${escapeHtml(subType)}</div>` : ''}
+        <div style="font-weight:600;font-size:0.8rem;margin-bottom:5px;line-height:1.3;">${escapeHtml(location)} · ${escapeHtml(date)}</div>
         <div style="font-size:0.7rem;color:rgba(255,255,255,.55);margin-bottom:5px;">
-          ${actor1}${actor2 ? ' vs ' + actor2 : ''}<br>
+          ${escapeHtml(actor1)}${actor2 ? ' vs ' + escapeHtml(actor2) : ''}<br>
           ${fatalities > 0 ? `<span style="color:var(--red);font-weight:600;">${fatalities} fatalities</span>` : 'No fatalities reported'}
         </div>
-        ${notes ? `<div style="font-size:0.65rem;color:rgba(255,255,255,0.4);line-height:1.5;margin-bottom:7px;border-left:1.5px solid rgba(255,255,255,0.1);padding-left:8px;">${notes.slice(0,200)}${notes.length>200?'…':''}</div>` : ''}
+        ${notes ? `<div style="font-size:0.65rem;color:rgba(255,255,255,0.4);line-height:1.5;margin-bottom:7px;border-left:1.5px solid rgba(255,255,255,0.1);padding-left:8px;">${escapeHtml(notes.slice(0,200))}${notes.length>200?'…':''}</div>` : ''}
         <a href="${gmUrl}" target="_blank" onclick="event.stopPropagation()"
            style="display:inline-block;color:#9a9a9a;font-size:0.65rem;font-weight:500;text-decoration:none;
                   background:rgba(154,154,154,0.12);border:0.5px solid rgba(154,154,154,0.3);
@@ -5304,7 +5295,7 @@ var TRANSLATIONS = {
     // Header stats
     stat_high:'High', stat_med:'Med', stat_low:'Low',
     // Map stats panel
-    stat_events:'Events', stat_medium:'Medium', stat_low_label:'Low', stat_acled:'ACLED events',
+    stat_events:'Events', stat_medium:'Medium', stat_low_label:'Low', stat_acled:'Historical events',
     // Control zones legend
     legend_zones:'Control Zones · RSS', legend_zones_sub:'Inferred from RSS · 90 days',
     legend_sac:'SAC / Tatmadaw', legend_eao:'EAO (KIA · AA · KNU…)',
@@ -5393,7 +5384,7 @@ var TRANSLATIONS = {
     briefing_asof:'Au', briefing_events_recorded:"événements ont été enregistrés en Birmanie au cours des dernières 24 heures.",
     briefing_concentrated:' concentrés en ', briefing_notably:' notamment en ', briefing_in:' en ',
     stat_high:'Élevé', stat_med:'Mod.', stat_low:'Bas',
-    stat_events:'Événements', stat_medium:'Moyen', stat_low_label:'Bas', stat_acled:'Événements ACLED',
+    stat_events:'Événements', stat_medium:'Moyen', stat_low_label:'Bas', stat_acled:'Événements historiques',
     legend_zones:'Contrôle territorial · RSS', legend_zones_sub:'Déduit des flux RSS · 90 jours',
     legend_sac:'SAC / Tatmadaw', legend_eao:'EAO (KIA · AA · KNU…)',
     legend_pdf:'PDF / Résistance', legend_contested:'Contesté',
@@ -5475,7 +5466,7 @@ var TRANSLATIONS = {
     briefing_asof:'မြန်မာနိုင်ငံတစ်ဝှမ်း', briefing_events_recorded:'ဖြစ်ရပ်များကို မှတ်တမ်းတင်ထားသည်။',
     briefing_concentrated:' တွင် အများဆုံး ', briefing_notably:' အထူးသဖြင့် ', briefing_in:' တွင် ',
     stat_high:'မြင့်မား', stat_med:'အလယ်', stat_low:'နိမ့်',
-    stat_events:'ဖြစ်ရပ်များ', stat_medium:'အလယ်အလတ်', stat_low_label:'နိမ့်', stat_acled:'ACLED ဖြစ်ရပ်များ',
+    stat_events:'ဖြစ်ရပ်များ', stat_medium:'အလယ်အလတ်', stat_low_label:'နိမ့်', stat_acled:'သမိုင်းဖြစ်ရပ်များ',
     legend_zones:'ထိန်းချုပ်ဇုန် · RSS', legend_zones_sub:'RSS မှ ရက် ၉၀ ခန့်မှန်း',
     legend_sac:'SAC / တပ်မတော်', legend_eao:'EAO (KIA · AA · KNU…)',
     legend_pdf:'PDF / တော်လှန်ရေး', legend_contested:'အငြင်းပွားနေသော',
@@ -5632,16 +5623,16 @@ function renderAirstrikes() {
   if (airstrikesLayer) { map.removeLayer(airstrikesLayer); airstrikesLayer = null; }
   if (!airstrikesVisible) return;
   airstrikesLayer = L.layerGroup();
-  const pool = allArticlesPool.length > 0 ? allArticlesPool : articles;
+  const pool = getFilteredArticles();
   const seen = new Map();
   pool.forEach(function(a) {
     const text = (a.title || '') + ' ' + (a.description || '');
     if (!isAirstrike(text)) return;
-    const locName = detectLocation(text);
+    const locName = a.location;
     if (!locName) return;
     const loc = MYANMAR_LOCATIONS.find(function(l) { return l.name === locName; });
     if (!loc) return;
-    if (!seen.has(locName) || new Date(a.pubDate) > new Date(seen.get(locName).pubDate)) {
+    if (!seen.has(locName) || (a._ts || 0) > (seen.get(locName).article._ts || 0)) {
       seen.set(locName, { article: a, loc: loc });
     }
   });
@@ -5655,16 +5646,16 @@ function renderAirstrikes() {
     });
     var marker = L.marker([loc.lat, loc.lng], { icon: icon, zIndexOffset: 800 });
     var ago = '';
-    if (a.pubDate) {
-      var diff = Math.round((Date.now() - new Date(a.pubDate)) / 60000);
+    if (a._ts) {
+      var diff = Math.round((Date.now() - new Date(a._ts)) / 60000);
       ago = diff < 60 ? diff + 'min ago' : Math.round(diff/60) + 'h ago';
     }
     marker.bindPopup(
       '<div style="font-family:inherit;min-width:240px;max-width:280px;">' +
       '<div style="font-size:0.5rem;font-weight:700;letter-spacing:0.1em;color:#ff453a;text-transform:uppercase;margin-bottom:4px;">💥 AIRSTRIKE · ' + loc.name.toUpperCase() + '</div>' +
-      '<div style="font-size:0.65rem;color:rgba(255,255,255,.85);line-height:1.5;margin-bottom:6px;">' + (a.title || '') + '</div>' +
-      '<div style="font-size:0.52rem;color:rgba(255,255,255,.4);">' + (a.source || '') + (ago ? ' · ' + ago : '') + '</div>' +
-      (a.link ? '<a href="' + a.link + '" target="_blank" style="display:inline-block;margin-top:6px;color:#9a9a9a;font-size:0.55rem;">Read article →</a>' : '') +
+      '<div style="font-size:0.65rem;color:rgba(255,255,255,.85);line-height:1.5;margin-bottom:6px;">' + escapeHtml(a.title || '') + '</div>' +
+      '<div style="font-size:0.52rem;color:rgba(255,255,255,.4);">' + escapeHtml(a.source || '') + (ago ? ' · ' + ago : '') + '</div>' +
+      (a.url ? '<a href="' + escapeHtml(safeArticleUrl(a.url)) + '" target="_blank" style="display:inline-block;margin-top:6px;color:#9a9a9a;font-size:0.55rem;">Read article →</a>' : '') +
       '</div>',
       { className: 'custom-popup' }
     );
@@ -5697,3 +5688,4 @@ document.addEventListener('click', function(e) {
 
 </body>
 </html>
+
