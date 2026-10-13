@@ -3493,7 +3493,9 @@ function normalizeArticle(item, feed) {
   const url = safeArticleUrl(item.link || item.url);
   if (!title || !url) return null;
   const combined = title + ' ' + description;
-  if (!isMyanmarRelevant(combined)) return null;
+  const aggregated = ['gnews','gdelt'].includes(feed.type) || /🔔|🔍|🌐|google|gdelt/i.test(feed.source || item.source || '');
+  // Aggregator excerpts can include unrelated recommendation links.
+  if (!isMyanmarRelevant(aggregated ? title : combined)) return null;
   const rawDate = item.pubDate || item.published_at || '';
   const ts = rawDate ? Date.parse(rawDate) : NaN;
   const valid = Number.isFinite(ts) && ts <= Date.now();
