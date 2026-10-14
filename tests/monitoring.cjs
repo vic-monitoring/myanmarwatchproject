@@ -1,0 +1,14 @@
+const assert=require('node:assert/strict');const C=require('../monitor-core.js');let n=0;function test(name,fn){fn();n++;console.log('PASS '+name)};
+const rows=[{url:'https://x/old',title:'Myanmar mining',source:'The Irrawaddy',location:'Shan State',_ts:Date.parse('2026-10-01'),date:'2026-10-01'},{url:'https://x/new',title:'Myanmar aid',source:'Other',location:null,_ts:Date.parse('2026-10-14'),date:'2026-10-14'},{url:'https://x/unknown-date',title:'Undated report',source:'Other',location:'Shan State',_ts:null}];
+test('Chronological default does not bury newer secondary sources',()=>assert.equal(C.filterArticles(rows)[0].url,'https://x/new'));
+test('Explicit Irrawaddy priority',()=>assert.equal(C.filterArticles(rows,{sort:'irrawaddy'})[0].source,'The Irrawaddy'));
+test('Unknown location remains searchable',()=>assert.equal(C.filterArticles(rows,{region:'unknown'}).length,1));
+test('Date range excludes unknown dates',()=>assert.equal(C.filterArticles(rows,{from:'2026-10-01',to:'2026-10-01'}).length,1));
+test('Combined search terms must both match',()=>assert.equal(C.filterArticles(rows,{query:'Shan mining'}).length,1));
+test('Unchanged article is not a change',()=>assert.equal(C.changes([{url:rows[0].url,signature:C.signature(rows[0])}],[rows[0]]).length,0));
+test('Changed location is a revision',()=>assert.equal(C.changes([{url:rows[0].url,signature:C.signature(rows[0])}],[{...rows[0],location:null}])[0].type,'updated'));
+test('New URL is a received article, not a corroborated event',()=>assert.equal(C.changes([],rows)[0].type,'new'));
+test('Reviews require reason and supported decision',()=>{assert.equal(C.cleanReview({url:'https://x/a',decision:'verified',note:'ok'}),null);assert.equal(C.cleanReview({url:'https://x/a',decision:'retained',note:''}),null)});
+test('Unsafe source and credential URLs rejected',()=>{assert.equal(C.safeURL('javascript:alert(1)'),'');assert.equal(C.safeURL('https://secret:x@x/a'),'')});
+test('Review preserves the proposed nature of a correction',()=>assert.equal(C.cleanReview({url:'https://x/a',decision:'corrected',note:'Check date'}).decision,'corrected'));
+console.log(n+' monitoring rule checks passed');
