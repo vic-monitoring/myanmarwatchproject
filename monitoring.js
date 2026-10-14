@@ -85,7 +85,7 @@ function showRegion(name){
 }
 function showChanges(){
   const rows=currentChanges;
-  panel(tr('Depuis votre dernière visite','Since your last visit'),`<p class="mw-small">${baselineTime?tr('Comparaison avec votre lecture du ','Compared with your reading on ')+e(time(baselineTime)):tr('Première visite : une référence locale est en cours de création.','First visit: establishing a local baseline.')}</p><div class="mw-note">${tr('Nouveautés parmi les articles reçus. Un nouvel article n’est pas nécessairement un nouvel événement. Ce journal est propre à cet appareil ; ce n’est pas une reconstitution historique complète de la carte.','Changes among received articles. A new article is not necessarily a new event. This log belongs to this device; it is not a complete historical reconstruction of the map.')}</div><div class="mw-row">${button('mark-read',tr('Marquer comme lus','Mark as read'))}${button('export-journal',tr('Exporter le journal','Export log'))}</div>${rows.length?rows.slice(0,100).map(r=>articleEntry(r.article,`<span class="mw-tag">${r.type==='new'?tr('Nouvel article reçu','New article received'):tr('Article modifié','Article updated')}</span>`)).join(''):'<p>'+tr('Aucun changement détecté dans les données reçues.','No changes detected in received data.')+'</p>'}`,'changes');
+  panel(tr('Depuis votre dernière visite','Since your last visit'),`<p class="mw-small">${baselineTime?tr('Comparaison avec votre lecture du ','Compared with your reading on ')+e(time(baselineTime)):tr('Première visite : une référence locale est en cours de création.','First visit: establishing a local baseline.')}</p><div class="mw-note">${tr('Publications nouvelles depuis la dernière visite et modifications d’articles déjà observés. Un nouvel article n’est pas nécessairement un nouvel événement. Ce journal est propre à cet appareil ; ce n’est pas une reconstitution historique complète de la carte.','Publications since the last visit and revisions to previously observed articles. A new article is not necessarily a new event. This log belongs to this device; it is not a complete historical reconstruction of the map.')}</div><div class="mw-row">${button('mark-read',tr('Marquer comme lus','Mark as read'))}${button('export-journal',tr('Exporter le journal','Export log'))}</div>${rows.length?rows.slice(0,100).map(r=>articleEntry(r.article,`<span class="mw-tag">${r.type==='new'?tr('Nouvel article reçu','New article received'):tr('Article modifié','Article updated')}</span>`)).join(''):'<p>'+tr('Aucun changement détecté dans les données reçues.','No changes detected in received data.')+'</p>'}`,'changes');
 }
 function showSources(){
   const rows=RSS_FEEDS.map(feed=>{const shared=server.health.find(h=>h.url===feed.url);return {feed,h:shared?{at:shared.last_success,latest:shared.latest_publication,count:shared.item_count,error:!!shared.error,shared:true}:health.get(feed.url)};});
@@ -99,7 +99,7 @@ function updateCoverage(){const rows=getFilteredArticles();$('mw-coverage').text
 function capture(){
   const now=new Date().toISOString();
   if(!baseline)baseline=articles.map(a=>({url:a.url,signature:C.signature(a)}));
-  currentChanges=previous?C.changes(baseline,articles):[];
+  currentChanges=previous?C.changes(baseline,articles).filter(r=>r.type==='updated'||(Number.isFinite(r.article._ts)&&r.article._ts>=Date.parse(baselineTime))):[];
   for(const a of articles){const old=articleHistory.get(a.url);const revision={at:now,title:a.title,location:a.location,description:a.description,date:a.date};const versions=old?.versions||[];if(!old||C.signature(old)!==C.signature(a))versions.push(revision);articleHistory.set(a.url,{...a,firstSeen:old?.firstSeen||now,lastSeen:now,versions:versions.slice(-10)});}
   ledger=[...articleHistory.values()].sort((a,b)=>Date.parse(b.lastSeen)-Date.parse(a.lastSeen)).slice(0,1000);articleHistory=new Map(ledger.map(a=>[a.url,a]));
   clearTimeout(persistTimer);persistTimer=setTimeout(()=>{save('mw-ledger-v2',ledger);save('mw-visit-v2',{at:now,articles:ledger.map(a=>({url:a.url,signature:C.signature(a)})).slice(0,2000)});},1000);
@@ -152,7 +152,9 @@ document.addEventListener('click',async ev=>{const target=ev.target.closest('[da
   else if(action==='share'&&lastDetail){const url=new URL(location.href);url.hash='report='+encodeURIComponent(lastDetail.url);try{await navigator.clipboard.writeText(url.href);target.textContent=tr('Lien copié','Link copied');}catch{target.after(Object.assign(document.createElement('input'),{value:url.href,readOnly:true}));}}
 });
 document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&activePanel)close();});
-const oldLang=selectLang;selectLang=function(lang){oldLang(lang);location.reload();};
+const oldLang=selectLang;selectLang=function(lang){const changed=currentLang!==lang;oldLang(lang);if(changed)location.reload();};
+let initialLanguage='en';try{const stored=localStorage.getItem('mw-lang');if(['en','fr','my'].includes(stored))initialLanguage=stored;}catch{}
+oldLang(initialLanguage);
 buildUI();
 for(const [i,label] of [tr('Tous','All'),tr('Militaire','Military'),tr('Politique','Politics'),tr('Opposition','Opposition'),tr('Humanitaire','Humanitarian')].entries()){const tab=document.querySelectorAll('.cat-tab')[i];if(tab)tab.textContent=label;}
 refresh();updateLayerEvidence([]);
