@@ -836,6 +836,7 @@ header{padding:0 18px;gap:18px}
 @media(max-width:760px){:root{--header-h:48px}header{padding:0 12px;gap:8px}.logo-wordmark{font-size:19px}.main{height:calc(100dvh - var(--header-h));display:flex}.main>.sidebar{height:40%}.main>div:not(.sidebar){height:60%}.sidebar-header{padding:4px 12px}.cat-tab{font-size:11px;padding:6px 8px}.news-item{padding:12px 14px}.news-title{font-size:15px}.atlas-recenter{bottom:25px;left:8px;padding:7px 9px}.map-controls{width:165px}.map-ctrl-btn{padding:5px;font-size:10px;min-height:28px}}
 </style>
 <style>.sidebar> *{flex-shrink:0}.cat-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.cat-tab{padding:6px 2px;font-size:10px}.cat-tab:nth-child(4){grid-column:1 / 2}.cat-tab:nth-child(5){grid-column:2 / 4}.atlas-recenter:hover{border-color:var(--accent)}</style>
+<link rel="stylesheet" href="monitoring.css?v=20261014">
 </head>
 <body>
 
@@ -4434,7 +4435,7 @@ let _d1Articles = []; // stockage persistant des articles D1
 
 async function loadHistoricalEvents() {
   try {
-    const res = await fetch('https://myanmar-proxy.victor-offer.workers.dev/events?limit=2000');
+    const res = await fetch('https://myanmar-proxy.victor-offer.workers.dev/events?limit=2000', {signal:AbortSignal.timeout(8000)});
     if (!res.ok) return;
     const data = await res.json();
     if (!data.events || data.events.length === 0) return;
@@ -4443,7 +4444,7 @@ async function loadHistoricalEvents() {
       title:       e.title,
       link:        e.link,
       pubDate:     e.published_at,
-      description: '',
+      description: e.content || '',
       source:      e.source,
       lang:        'en',
       type:        'rss',
@@ -5201,6 +5202,8 @@ document.addEventListener('click', function(e) {
 });
 </script>
 
+<script src="monitor-core.js?v=20261014"></script>
+<script src="monitoring.js?v=20261014"></script>
 </body>
 </html>
 
