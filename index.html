@@ -15,7 +15,7 @@
 <meta name="twitter:title" content="Myanmar Watch — Live Conflict Intelligence">
 <meta name="twitter:description" content="Real-time conflict monitoring for Myanmar — RSS feeds, satellite imagery, territorial control zones.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🇲🇲</text></svg>">
-<link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600&family=SF+Mono:wght@400;500&display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
@@ -787,15 +787,42 @@
   @keyframes hotspot-ring{0%{stroke-opacity:0.8;r:10}50%{stroke-opacity:0.3;r:16}100%{stroke-opacity:0.8;r:10}}
   .hotspot-pulse path { animation: hotspot-ring 2s ease-in-out infinite; }
 </style>
-</head>
+<style>
+/* Myanmar Watch — approved dark cartographic design */
+:root{--bg:#0d1217;--surface:#171e25;--panel:#1c252e;--border:#303b45;--border2:#4a5764;--text:#eef2f6;--text2:#bdc8d2;--text3:#98a8b6;--accent:#fa806c;--red:#fa806c;--orange:#eab967;--green:#65c4b4;--header-h:76px}
+body,button,input,select,.leaflet-container{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+header{background:var(--bg);backdrop-filter:none;padding:0 28px;gap:24px;border-bottom:1px solid var(--border)}
+.logo{display:block}.logo-wordmark{font-size:27px;letter-spacing:-.7px;text-transform:none;font-weight:650}.brand-caption{display:block;font-size:10px;letter-spacing:2px;color:var(--text2);margin-top:4px}
+.header-right{gap:12px}.header-right .hdr-stat,.header-right .hdr-sep,#hdr-clock{display:none}.tv-btn{border:0!important;background:none;font-size:12px;border-radius:3px;padding:9px;color:var(--text2)}.tv-btn:hover,.tv-btn.active{background:var(--panel);color:var(--text)}
+.design-nav{display:flex;gap:24px;align-items:center;margin-left:auto}.design-nav button{background:none;border:0;border-bottom:2px solid transparent;padding:25px 0;color:var(--text2);font-size:14px;cursor:pointer}.design-nav button:first-child{border-color:var(--accent);color:var(--text)}
+.atlas-toolbar{height:46px;display:flex;justify-content:space-between;align-items:center;padding:0 28px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text2)}.atlas-toolbar button{background:none;border:0;color:var(--text);font:inherit;padding:8px 12px;cursor:pointer}.atlas-toolbar button:hover{background:var(--panel)}
+.main{height:calc(100dvh - var(--header-h) - 46px);grid-template-columns:minmax(340px,33.333%) 1fr}.sidebar{background:var(--bg);scrollbar-width:thin}.feed-intro{padding:26px 26px 18px}.feed-intro small{font-size:11px;letter-spacing:1.5px;color:var(--text2)}.feed-intro h1{font-size:25px;line-height:1.3;letter-spacing:-.6px;margin:10px 0;font-weight:600}.feed-intro p{font-size:13px;color:var(--text2)}
+.sidebar-header{padding:10px 26px;background:var(--surface)}.sidebar-header summary{cursor:pointer;font-size:12px;color:var(--text2);padding:5px 0}.sidebar-header[open] summary{margin-bottom:12px}.keyword-tags{gap:5px}.search-input{min-width:0}.btn,.keyword-tag,.search-input{border-radius:4px}.hist-panel{margin:0;border-radius:0}.hist-panel-header{padding:12px 26px}.feed-header{padding:14px 26px}.cat-tabs{display:flex;overflow-x:auto;justify-content:flex-start;scrollbar-width:thin}.cat-tab{flex-shrink:0;font-size:12px;padding:11px}.time-tabs{padding:10px 22px}.time-tab{font-size:11px}.news-item{padding:22px 26px;border-bottom:1px solid var(--border);border-left-width:3px}.news-item.active{background:#1c252d;border-left-color:var(--accent)}.news-meta{font-size:11px;margin-bottom:10px;gap:8px;flex-wrap:wrap}.news-meta span{color:var(--text2)!important;font-size:11px!important}.news-title{font-size:19px;font-weight:550;line-height:1.4;margin-bottom:10px;letter-spacing:-.25px;-webkit-line-clamp:4}.news-location{font-size:12px;color:var(--text2)}.news-location span{font-size:11px!important}.severity-dot{width:6px;height:6px}.news-excerpt{font-size:13px;line-height:1.6;color:var(--text2);margin:6px 0 12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}#primary-source-status{padding:12px 26px!important;color:var(--text2)!important;font-size:11px!important;line-height:1.6;border-bottom:1px solid var(--border)}
+.map-area,.leaflet-container{background:#182229}.map-dark .leaflet-tile{filter:brightness(1.3) saturate(.55)}.map-controls{top:18px;left:18px;padding:10px;width:218px;background:#111920f5;border:1px solid #46525d;border-radius:4px;backdrop-filter:none}.layers-heading{font-size:10px;letter-spacing:1.5px;color:var(--text2);padding:5px 9px 10px}.map-ctrl-btn{font-size:11px;letter-spacing:0;padding:8px 9px;color:#c9d3dc;border-radius:3px;gap:9px}.map-ctrl-btn.active{background:#25303a;color:#fff}.ctrl-dot{width:12px;height:12px;border:1px solid #94a2af;background:transparent;border-radius:2px;flex-shrink:0}.active .ctrl-dot{background:var(--accent);border-color:var(--accent);box-shadow:none}.ctrl-dot::after{content:''}.active .ctrl-dot::after{content:'✓';display:block;font-size:10px;line-height:10px;color:#10151a}.layer-glyph{width:17px;height:17px;flex-shrink:0;color:var(--text2)}#ctrl-collapse-btn{font-size:11px!important;color:var(--text2)!important;padding:9px!important}.map-stats{background:#111920f2!important;border:1px solid var(--border)!important;border-radius:4px!important;padding:12px!important}.stat-label{font-size:10px!important;color:var(--text2)!important}.zones-legend{background:#111920fa;border:1px solid var(--border);border-radius:4px;padding:12px;color:var(--text2);max-width:260px}.zones-legend-title{font-size:12px;color:var(--text);margin-bottom:8px}.legend-row{font-size:11px}.leaflet-control-zoom{margin-top:10px!important}.leaflet-bar{border:1px solid #46525d!important;box-shadow:none!important}.leaflet-bar a{background:#15202a!important;color:#eff4f8!important;border-color:#46525d!important}.leaflet-control-attribution{background:#101820df!important;color:#becad3!important}.leaflet-control-attribution a{color:#9dcee2!important}
+.atlas-symbol{width:32px;height:32px;display:grid;place-items:center;background:#121c24;border:2px solid currentColor;border-radius:50%;position:relative;box-shadow:0 0 0 2px #101820b0}.atlas-symbol svg{width:19px;height:19px}.atlas-symbol.mines{border-radius:7px}.atlas-symbol.bases{border-radius:3px}.atlas-symbol.scam{border-radius:9px}.atlas-count{position:absolute;right:-9px;top:-8px;min-width:17px;padding:1px 4px;background:#eff4f8;border-radius:8px;font-size:10px;color:#14202b;font-weight:700;border:1px solid #14202b}.atlas-map-label{background:#111a23f2;border:1px solid #718191;border-left:3px solid var(--accent);border-radius:3px;box-shadow:none;color:#edf3f8;font-size:12px;line-height:1.45;padding:7px 10px}.atlas-map-label:before{border-right-color:#718191!important}.atlas-map-label small{display:block;color:#bfccd7;font-size:10px}.leaflet-tooltip{font-family:inherit}.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#141e27;color:var(--text);border-radius:4px;box-shadow:0 6px 24px #0004}.leaflet-popup-content-wrapper{border:1px solid #526171}.leaflet-popup-content{font-size:13px;line-height:1.6;margin:20px;max-height:48vh;overflow:auto}.leaflet-popup-content div,.leaflet-popup-content p,.leaflet-popup-content small{font-size:12px!important;color:#c5d1dd!important;line-height:1.6!important}.leaflet-popup-content b{font-size:15px;color:#fff}.leaflet-popup-content a{color:#fa9b88!important}.leaflet-popup-close-button{color:#e9eff5!important;font-size:24px!important}.leaflet-popup-content p{margin:10px 0}.custom-marker,.airstrike-core,.hotspot-pulse path{animation:none!important;box-shadow:none!important}.tv-panel,.src-panel,.sat-panel{background:#141e27!important;border:1px solid #46525d!important;border-radius:4px!important}.src-desc,.src-item{font-size:12px!important;color:#c2ccd6!important;line-height:1.6!important}.src-title{font-size:13px!important;color:#f0f4f8!important}.tv-panel-header{font-size:13px}.acled-banner{border-radius:4px;background:#15202a;color:var(--text2)}
+button:focus-visible,summary:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid #7eb5eb;outline-offset:3px}button{touch-action:manipulation}
+@media(min-width:1500px){.feed-intro h1{font-size:29px}.news-title{font-size:22px}}
+@media(max-width:1100px){header{padding:0 16px;gap:14px}.logo-wordmark{font-size:22px}.design-nav{gap:15px}.header-right{gap:3px}#sat-btn{display:none}.main{grid-template-columns:350px 1fr}.map-controls{width:185px;left:10px;top:10px}.map-ctrl-btn{font-size:10px;padding:7px 5px}.map-stats{display:none}}
+@media(max-width:760px){:root{--header-h:66px}header{padding:0 14px}.logo-wordmark{font-size:21px}.brand-caption{font-size:8px}.design-nav{display:none}.header-right{gap:2px}#tv-btn,#sat-btn,#briefing-btn{display:none}.atlas-toolbar{padding:0 8px;font-size:11px}.atlas-toolbar button{padding:9px 6px}.main{display:flex;flex-direction:column;height:calc(100dvh - 112px)}.main>.sidebar{order:2;height:43%;width:100%;border-top:1px solid var(--border);flex-shrink:0}.main>div:not(.sidebar){order:1;min-height:0;height:57%;flex:1!important}.feed-intro{padding:14px 18px}.feed-intro h1{font-size:20px;margin:5px 0}.feed-intro p{font-size:11px}.sidebar-header{padding:7px 18px}.news-item{padding:16px 18px}.news-title{font-size:17px}.map-controls{width:165px;max-height:calc(100% - 24px);overflow:auto;padding:6px}.map-ctrl-btn{font-size:9px;padding:5px}.layers-heading{padding:3px 6px}.layer-glyph{width:14px}.zones-legend{display:none!important}.atlas-map-label{font-size:10px;padding:4px 7px}.atlas-map-label small{font-size:9px}.leaflet-popup-content{margin:15px;max-height:28vh}.tv-panel{max-width:calc(100vw - 24px)!important;right:12px!important}.src-panel{max-width:calc(100vw - 24px)!important}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+</style>
+<style>.atlas-national .city-detail,.atlas-national .atlas-region{display:none!important}.ctrl-dot{box-shadow:none!important}.leaflet-marker-icon{outline-offset:4px}</style>
+<style>
+.map-dark .leaflet-tile{filter:brightness(.8) sepia(.25) hue-rotate(155deg) saturate(.65)}
+#btn-zones .layer-glyph,#btn-airstrikes .layer-glyph{color:#fa806c}#btn-scam .layer-glyph{color:#eab967}#btn-jade .layer-glyph{color:#65c4b4}#btn-military .layer-glyph{color:#82ace6}
+#ctrl-expand-btn{background:#141e27!important;color:#eaf0f5!important;border-radius:3px!important;font-size:12px!important}
+@media(max-width:760px){.feed-intro,#primary-source-status{display:none}.news-meta{margin-bottom:6px}.leaflet-control-attribution{font-size:8px!important}.map-ctrl-btn{min-height:28px}.hist-panel-header{padding:9px 18px}}
+</style></head>
 <body>
 
 <header>
   <div class="header-left">
     <div class="logo">
-      <span class="logo-wordmark">MYANMAR<em class="logo-sep">·</em>WATCH</span>
+      <span class="logo-wordmark">Myanmar Watch</span><span class="brand-caption" data-i18n="design_brand">MONITORING & CARTOGRAPHY</span>
     </div>
   </div>
+  <nav class="design-nav" aria-label="Main navigation"><button onclick="recenterAtlas()" data-i18n="design_map">Map</button><button onclick="document.querySelector('.sidebar').scrollTo({top:0,behavior:'smooth'})" data-i18n="design_news">News</button><button onclick="toggleHistPanel();document.getElementById('hist-panel').scrollIntoView({block:'nearest'})" data-i18n="design_history">History</button></nav>
   <div class="header-right">
     <div class="hdr-stat"><div class="hdr-stat-label" data-i18n="stat_high">High</div><div class="hdr-stat-val hi" id="stat-high">—</div></div>
     <div class="hdr-stat"><div class="hdr-stat-label" data-i18n="stat_med">Med</div><div class="hdr-stat-val med" id="stat-med">—</div></div>
@@ -814,6 +841,7 @@
     <button class="tv-btn" id="briefing-btn" onclick="toggleBriefingPanel()" style="border-color:rgba(100,200,255,0.3);">&#128203; <span data-i18n="btn_briefing">BRIEFING</span></button>
   </div>
 </header>
+<div class="atlas-toolbar"><span data-i18n="design_national">Myanmar · National view</span><div><button onclick="document.getElementById('atlas-filters').open = !document.getElementById('atlas-filters').open" data-i18n="design_filters">Filters</button><button onclick="recenterAtlas()" data-i18n="design_recenter">Recenter ↗</button></div></div>
 
 <div class="tv-panel" id="tv-panel">
   <div class="tv-panel-header"><span>📺 <span data-i18n="media_title">Myanmar Media — YouTube</span></span><span onclick="toggleTvPanel()" style="cursor:pointer;color:var(--text3);font-size:1.1rem;">×</span></div>
@@ -829,7 +857,8 @@
 <div class="main">
   <!-- SIDEBAR -->
   <div class="sidebar">
-    <div class="sidebar-header">
+    <div class="feed-intro"><small data-i18n="design_feed">THE FEED</small><h1 data-i18n="design_heading">Myanmar, day by day.</h1><p data-i18n="design_source">Primary source · The Irrawaddy</p></div>
+    <details class="sidebar-header" id="atlas-filters"><summary data-i18n="design_filters">Filters</summary>
       <div class="section-label" data-i18n="kw_filter">Keyword Filter</div>
       <div class="search-row">
         <input class="search-input" id="keyword-input" placeholder="Add keyword..." data-i18n-ph="kw_placeholder" />
@@ -841,7 +870,7 @@
 
       </div>
       <div class="myanmar-label" id="myanmar-kw-display"></div>
-    </div>
+    </details>
 
     <!-- HISTORICAL EVENTS PANEL -->
     <div class="hist-panel" id="hist-panel">
@@ -1014,7 +1043,7 @@
     <div id="map"></div>
 
     <!-- MAP CONTROLS -->
-    <div class="map-controls" id="map-controls">
+    <div class="map-controls" id="map-controls"><div class="layers-heading" data-i18n="design_layers">MAP LAYERS</div>
       <button class="map-ctrl-btn" id="btn-satellite" onclick="toggleSatellite()">
         <div class="ctrl-dot"></div> <span data-i18n="btn_satellite">SATELLITE</span>
       </button>
@@ -1076,35 +1105,7 @@
     <div class="zones-legend" id="military-legend" style="bottom:30px;left:14px;right:auto;display:none;">
       <div class="zones-legend-title"><span data-i18n="legend_mil_title">Military Bases</span></div>
       <div style="font-size:0.52rem;color:rgba(255,255,255,0.28);margin-bottom:6px;"><span data-i18n="legend_mil_sub">Click an icon for details</span></div>
-      <!-- SAC -->
-      <div style="font-size:0.58rem;color:rgba(255,255,255,0.4);font-weight:600;margin:4px 0 3px;text-transform:uppercase;letter-spacing:0.05em;"><span data-i18n="legend_sac">SAC / Tatmadaw</span></div>
-      <div class="legend-row" style="gap:8px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="#e74c3c"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>
-        <span data-i18n="mil_hq">Commandement Suprême / QG</span>
-      </div>
-      <div class="legend-row" style="gap:8px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="#e74c3c"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 4h2v3h3v2h-3v3h-2v-3H9v-2h3V5z"/></svg>
-        <span data-i18n="mil_regional">Commandement Régional</span>
-      </div>
-      <div class="legend-row" style="gap:8px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="#e74c3c"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg>
-        <span data-i18n="mil_airbase">Base Aérienne</span>
-      </div>
-      <div class="legend-row" style="gap:8px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="#e74c3c"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
-        <span data-i18n="mil_base">Base / Garnison</span>
-      </div>
-      <!-- EAO -->
-      <div style="height:0.5px;background:rgba(255,255,255,.08);margin:6px 0;"></div>
-      <div style="font-size:0.58rem;color:rgba(255,255,255,0.4);font-weight:600;margin:0 0 3px;text-transform:uppercase;letter-spacing:0.05em;"><span data-i18n="mil_eao_title">EAO — Groupes Armés Ethniques</span></div>
-      <div class="legend-row" style="gap:8px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="#8e44ad"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
-        <span data-i18n="mil_eao_hq">QG / État-Major EAO</span>
-      </div>
-      <div class="legend-row" style="gap:8px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="#8e44ad"><path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/></svg>
-        <span data-i18n="mil_eao_base">Base EAO</span>
-      </div>
+      <div style="font-size:12px;color:#c5d1dd;line-height:1.6">Historical inventory · blue flag<br>Numbered markers group nearby sites. Click to zoom; open an individual marker for its source and reported status.</div>
     </div>
 <div class="tv-panel" id="sat-panel" style="width:360px;max-height:88vh;flex-direction:column;">
   <div class="tv-panel-header">
@@ -1559,17 +1560,36 @@ let activeTimeFilter = '24h'; // '24h' | '7d' | '30d' | 'all'
 let markers = [];
 let activeArticle = null;
 
+function atlasGlyph(kind) {
+  const paths = {event:'<path d="M12 3 22 21H2Z"/><path d="M12 9v5m0 3v1"/>',scam:'<path d="M12 3 20 6v6c0 5-8 9-8 9s-8-4-8-9V6Z"/><path d="M12 8v6m0 3v.1"/>',mines:'<path d="m5 21 12-14M3 7c6-5 13-4 18 2l-3 3c-4-5-8-7-15-5Z"/>',bases:'<path d="M5 22V3m0 1c5-4 9 4 15 0v10c-6 4-10-4-15 0"/>',satellite:'<circle cx="12" cy="12" r="4"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2 2m10 10 2 2M5 19l2-2M17 7l2-2"/>',roads:'<path d="m7 2-4 20M17 2l4 20M12 2v4m0 4v4m0 4v4"/>',labels:'<path d="M4 4h16v16H4ZM8 9h8m-4 0v7"/>',history:'<circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 3"/>'};
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[kind] || paths.event}</svg>`;
+}
+function atlasIcon(kind, count = 0, tone = null) {
+  const color = tone || {event:'#fa806c',scam:'#eab967',mines:'#65c4b4',bases:'#82ace6'}[kind] || '#a5bac9';
+  return L.divIcon({className:'',html:`<div class="atlas-symbol ${kind}" style="color:${color}">${atlasGlyph(kind)}${count>1?`<span class="atlas-count">${count}</span>`:''}</div>`,iconSize:[32,32],iconAnchor:[16,16]});
+}
+function atlasLabel(marker,title,subtitle,permanent=false) {
+  marker.bindTooltip(`<b>${escapeHtml(title)}</b><small>${escapeHtml(subtitle)}</small>`,{className:'atlas-map-label',direction:'right',offset:[20,0],permanent,opacity:1});
+  return marker;
+}
+function recenterAtlas() { map.invalidateSize(); map.fitBounds([[9.5,92.1],[28.6,101.2]],{paddingTopLeft:[window.innerWidth>760?220:120,20],paddingBottomRight:[20,20]}); }
+
 const map = L.map('map', {
   center: [19.5, 96.5],
   zoom: 7,
+  zoomSnap: 0.25,
   zoomControl: false,
   attributionControl: true,
-  minZoom: 5,
+  minZoom: 3,
   maxZoom: 13,
   maxBounds: [[9.0, 87.0], [29.5, 106.0]],
   maxBoundsViscosity: 0.95,
 });
 
+L.control.zoom({position:'bottomright'}).addTo(map);
+recenterAtlas();
+function adaptAtlasLabels(){document.getElementById('map').classList.toggle('atlas-national',map.getZoom()<6);}
+map.on('zoomend',adaptAtlasLabels);adaptAtlasLabels();
 L.control.scale({ position: 'bottomright', imperial: false, maxWidth: 120 }).addTo(map);
 
 const gtIcon = L.divIcon({
@@ -1741,14 +1761,14 @@ setTimeout(() => {
     .then(r => { if (!r.ok) throw new Error(); return r.json(); })
     .then(geojson => {
       myanmarOutline = L.geoJSON(geojson, {
-        style: { color: '#c8a96e', fillColor: 'transparent', weight: 2, opacity: 0.85, fillOpacity: 0, interactive: false },
+        style: { color: '#c3c3ae', fillColor: '#334450', weight: 1.4, opacity: 0.85, fillOpacity: 0.5, interactive: false },
         smoothFactor: 0,
         tolerance: 0
       }).addTo(map);
     })
     .catch(() => {
       myanmarOutline = L.polygon(MYANMAR_BORDER_FALLBACK, {
-        color: '#c8a96e', fillColor: 'transparent', weight: 2.5, opacity: 0.8, fillOpacity: 0, interactive: false
+        color: '#c3c3ae', fillColor: '#334450', weight: 1.4, opacity: 0.8, fillOpacity: 0.5, interactive: false
       }).addTo(map);
     });
 }, 1000);
@@ -1789,7 +1809,7 @@ function updateHotspots() {
     const loc = MYANMAR_LOCATIONS.find(l => l.name === name);
     if (!loc) continue;
     const body = items.map(a => `<p><b>${escapeHtml(a.date)}</b> · ${Date.now()-a._ts > 30*86400000 ? 'Archive' : 'Reported'}<br><a href="${escapeHtml(safeArticleUrl(a.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(a.title)}</a>${a.description ? '<br>'+escapeHtml(a.description) : ''}</p>`).join('');
-    L.circleMarker([loc.lat,loc.lng], {radius:10,color:'#64c8ff',fillOpacity:.15,weight:2})
+    atlasLabel(L.marker([loc.lat,loc.lng],{icon:atlasIcon('event')}),name,'Territorial reports')
       .bindPopup(`<div style="max-width:310px"><b>${escapeHtml(name)} · Territorial reports</b><p>Regional reference only. No verified front line or territorial boundary. Reports may describe different dates and places.</p>${body}<small>Source: The Irrawaddy · curated review 2026-10-13; RSS reports refresh with news.</small></div>`)
       .addTo(hotspotLayerGroup);
   }
@@ -2050,7 +2070,7 @@ function updateLayerEvidence(batches = []) {
     const body = `<b>${escapeHtml(r.location)}</b>` + reports.slice(0,5).map(evidenceHtml).join('<hr>');
     const ref = r.site && layerSiteMarkers[r.kind]?.get(r.site);
     if (ref) ref.marker.setPopupContent(body+'<hr>'+ref.original);
-    else L.circleMarker([r.lat,r.lng],{radius:11,color:r.kind==='scam'?'#ff9f0a':r.kind==='mines'?'#bf5af2':'#64c8ff',weight:2,fillOpacity:.18})
+    else atlasLabel(L.marker([r.lat,r.lng],{icon:atlasIcon(r.kind)}),r.location,r.change)
       .bindPopup(body,{maxWidth:340}).addTo(layerEvidenceGroups[r.kind]);
   }
   const panel = document.getElementById('layer-evidence-list');
@@ -2074,12 +2094,8 @@ MYANMAR_MINES.forEach(mine => {
     `<span style="display:inline-block;background:rgba(255,255,255,0.07);border:0.5px solid rgba(255,255,255,.15);border-radius:4px;padding:1px 6px;font-size:0.6rem;margin:1px 2px 1px 0;">${m}</span>`
   ).join('');
 
-  const icon = L.divIcon({
-    className: '',
-    html: `<div style="font-size:15px;line-height:1;filter:drop-shadow(0 0 5px ${cfg.color});">${cfg.icon}</div>`,
-    iconSize: [20, 20], iconAnchor: [10, 10]
-  });
-  const marker = L.marker([mine.lat, mine.lng], { icon });
+  const marker = L.marker([mine.lat,mine.lng],{icon:atlasIcon('mines')});
+  atlasLabel(marker,mine.name,'Historical mining reference');
   const gmUrl = `https://www.google.com/maps?q=${mine.lat},${mine.lng}`;
   marker.bindPopup(`<p style="color:#ffcf80">Historical reference · location, control and current activity not reverified.</p>
     <div style="font-family:-apple-system,'Inter',sans-serif;min-width:240px;max-width:300px;">
@@ -2099,13 +2115,7 @@ MYANMAR_MINES.forEach(mine => {
   layerSiteMarkers.mines.set(mine.name,{marker,original:marker.getPopup().getContent()});
   mineLayerGroup.addLayer(marker);
 
-  mineLayerGroup.addLayer(L.marker([mine.lat, mine.lng], {
-    icon: L.divIcon({
-      className: '',
-      html: `<div style="color:${cfg.color};font-family:'DM Mono',monospace;font-size:0.54rem;white-space:nowrap;margin-top:13px;margin-left:8px;text-shadow:0 0 6px #000,0 0 3px #000;">${mine.name}</div>`,
-      iconSize: [0, 0], iconAnchor: [0, 0]
-    })
-  }));
+
 });
 
 mineLayerGroup.addLayer(layerEvidenceGroups.mines);
@@ -2130,7 +2140,7 @@ function applyScamFilter() {
   scamLayerGroup.addLayer(layerEvidenceGroups.scam);
   SCAM_REPORTS.forEach(r => {
     const historical = Date.now() - Date.parse(r.published) > 30*86400000;
-    L.circleMarker([r.lat,r.lng], {radius:14,color:historical?'#8e8e93':'#ff9f0a',fillOpacity:.15,weight:2})
+    atlasLabel(L.marker([r.lat,r.lng],{icon:atlasIcon('scam')}),r.name,historical?'Historical report':'Regional report',window.innerWidth>760)
       .bindPopup(`<div style="max-width:300px"><b>${escapeHtml(r.name)}</b><p>${historical?'Historical report':'Dated regional report'} · ${escapeHtml(r.published)}</p><p>${escapeHtml(r.summary)}</p><p>Approximate town reference, not a compound location or perimeter. Individual sites and current operators require verification.</p><a href="${escapeHtml(safeArticleUrl(r.url))}" target="_blank" rel="noopener noreferrer">Read The Irrawaddy</a><p>Reviewed ${r.reviewed}</p></div>`)
       .addTo(scamLayerGroup);
   });
@@ -2699,8 +2709,9 @@ MILITARY_BASES.forEach(base => {
 
   const iconHtml = '<div style="width:' + size + 'px;height:' + size + 'px;display:flex;align-items:center;justify-content:center;background:' + color + '22;border:1.5px solid ' + color + ';' + bgShape + 'font-size:' + fontSize + 'px;cursor:pointer;box-shadow:0 0 8px ' + color + '55;">' + symbol + '</div>';
 
-  const icon = L.divIcon({ className: '', html: iconHtml, iconSize: [size, size], iconAnchor: [size/2, size/2] });
+  const icon = atlasIcon('bases');
   const marker = L.marker([base.lat, base.lng], { icon });
+  atlasLabel(marker,base.name,'Historical base reference');
 
   const statusColor = (base.status||'').includes('Capturé') || (base.status||'').includes('incertain') ? '#f39c12'
     : (base.status||'').includes('Actif') ? '#30d158' : '#aeaeb2';
@@ -2819,14 +2830,14 @@ const regionsLayerGroup = L.layerGroup();
 let citiesVisible = false;
 
 CITIES.forEach(city => {
-  const fsize = city.size === 'lg' ? '0.72rem' : city.size === 'md' ? '0.62rem' : '0.55rem';
+  const fsize = city.size === 'lg' ? '13px' : city.size === 'md' ? '12px' : '11px';
   const fw = city.size === 'lg' ? '600' : '400';
   const dotSize = city.size === 'lg' ? 7 : city.size === 'md' ? 5 : 4;
   const dotColor = city.size === 'lg' ? '#c8a96e' : '#8a7a5a';
 
   const dotBg = city.size==='lg' ? 'rgba(255,255,255,.85)' : city.size==='md' ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.4)';
   const dotIcon = L.divIcon({
-    className: '',
+    className: city.size === 'lg' ? 'city-major' : 'city-detail',
     html: `<div style="width:${dotSize}px;height:${dotSize}px;background:${dotBg};border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.8);"></div>`,
     iconSize: [dotSize, dotSize], iconAnchor: [dotSize/2, dotSize/2]
   });
@@ -2844,7 +2855,7 @@ CITIES.forEach(city => {
 
   const labelColor = city.size==='lg' ? 'rgba(255,255,255,0.9)' : city.size==='md' ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.5)';
   const labelIcon = L.divIcon({
-    className: '',
+    className: city.size === 'lg' ? 'city-major' : 'city-detail',
     html: `<div style="color:${labelColor};font-family:-apple-system,'Inter',sans-serif;font-size:${fsize};font-weight:${fw};white-space:nowrap;margin-left:${dotSize+4}px;margin-top:-7px;text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 8px rgba(0,0,0,.8);pointer-events:none;letter-spacing:0.01em;">${city.name}</div>`,
     iconSize: [0, 0], iconAnchor: [0, 0]
   });
@@ -2854,9 +2865,9 @@ CITIES.forEach(city => {
 
 REGIONS.forEach(r => {
   const regionIcon = L.divIcon({
-    className: '',
+    className: 'atlas-region',
     html: `<div style="
-      color:rgba(255,255,255,0.18);
+      color:rgba(211,223,232,0.55);
       font-family:-apple-system,'Inter',sans-serif;
       font-size:0.62rem;font-weight:700;
       white-space:nowrap;
@@ -3283,6 +3294,7 @@ function renderFeed() {
       <div class="news-title">
         <span class="severity-dot sev-${a.severity === 'high' ? 'high' : a.severity === 'medium' ? 'med' : 'low'}"></span>${escapeHtml(a.title)}
       </div>
+      ${a.description ? `<div class="news-excerpt">${escapeHtml(a.description)}</div>` : ''}
       <div class="news-location" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
         <span>${escapeHtml(a.location || (currentLang === 'fr' ? 'Localisation non déterminée' : 'Location undetermined'))}</span>
         <span style="font-size:0.58rem;color:${catColor};font-weight:500;text-transform:uppercase;letter-spacing:0.06em;">${cat}</span>
@@ -3341,18 +3353,8 @@ function renderMarkers() {
     const sz = total === 1 ? 12 : total <= 3 ? 16 : total <= 8 ? 22 : 28;
     const showCount = total > 1;
 
-    const icon = L.divIcon({
-      className: '',
-      html: `<div class="custom-marker ${sevCls}" style="
-        width:${sz}px;height:${sz}px;border-radius:50%;
-        display:flex;align-items:center;justify-content:center;
-        font-size:${sz > 16 ? '9' : '0'}px;font-weight:700;color:#fff;
-        border:${showCount ? '1.5px solid rgba(255,255,255,0.5)' : 'none'};
-      ">${showCount ? total : ''}</div>`,
-      iconSize: [sz, sz], iconAnchor: [sz/2, sz/2]
-    });
-
-    const marker = L.marker([loc.lat, loc.lng], { icon });
+    const marker = L.marker([loc.lat,loc.lng],{icon:atlasIcon('event',total,sevColor),title:loc.name});
+    atlasLabel(marker,loc.name,`${total} reports · regional reference`,Object.keys(groups).length <= 4 && window.innerWidth > 760);
 
     if (total === 1) {
       const idx = (high[0] ?? medium[0] ?? low[0]);
@@ -4399,9 +4401,7 @@ regionsLayerGroup.addTo(map);
 citiesVisible = true;
 document.getElementById('btn-cities').classList.add('active');
 
-roadsLayerGroup.addTo(map);
-roadsVisible = true;
-document.getElementById('btn-roads').classList.add('active');
+// Transport is available on demand so national view stays uncluttered.
 
 renderKeywords();
 
@@ -4734,6 +4734,7 @@ var currentLang = 'en';
 
 var TRANSLATIONS = {
   en: {
+design_brand:"MONITORING & CARTOGRAPHY",design_map:"Map",design_news:"News",design_history:"History",design_national:"Myanmar · National view",design_filters:"Filters",design_recenter:"Recenter ↗",design_feed:"THE FEED",design_heading:"Myanmar, day by day.",design_source:"Primary source · The Irrawaddy",design_layers:"MAP LAYERS",
     // Header buttons
     btn_satellite:'SATELLITE', btn_zones:"TERRITORIAL REPORTS", btn_mines:'MINES',
     btn_scam:'SCAM', btn_transport:'TRANSPORT', btn_military:'MILITARY BASES',
@@ -4826,6 +4827,7 @@ var TRANSLATIONS = {
     media_sub1:'Independent Myanmar News', media_sub2:'Analysis & Search',
   },
   fr: {
+design_brand:"VEILLE & CARTOGRAPHIE",design_map:"Carte",design_news:"Actualités",design_history:"Historique",design_national:"Myanmar · Vue nationale",design_filters:"Filtres",design_recenter:"Recentrer ↗",design_feed:"LE FIL",design_heading:"Le Myanmar, au jour le jour.",design_source:"Source principale · The Irrawaddy",design_layers:"COUCHES",
     btn_satellite:'SATELLITE', btn_zones:"SITUATION TERRITORIALE", btn_mines:'MINES',
     btn_scam:'SCAM', btn_transport:'TRANSPORT', btn_military:'BASES MILITAIRES',
     btn_cities:'LABELS', btn_gt:'TRIANGLE D\u2019OR', btn_airstrikes:'FRAPPES AÉRIENNES',
@@ -4907,6 +4909,7 @@ var TRANSLATIONS = {
     media_sub1:'Médias Myanmar indépendants', media_sub2:'Analyse & Recherche',
   },
   my: {
+design_brand:"MONITORING & CARTOGRAPHY",design_map:"Map",design_news:"News",design_history:"History",design_national:"Myanmar · National view",design_filters:"Filters",design_recenter:"Recenter ↗",design_feed:"THE FEED",design_heading:"Myanmar, day by day.",design_source:"Primary source · The Irrawaddy",design_layers:"MAP LAYERS",
     btn_satellite:'ဂြိုလ်တု', btn_zones:"TERRITORIAL REPORTS", btn_mines:'သတ္တုမိုင်းများ',
     btn_scam:'လိမ်လည်မှု', btn_transport:'သယ်ယူပို့ဆောင်ရေး', btn_military:'စစ်ဘေ့စ်များ',
     btn_cities:'တံဆိပ်များ', btn_gt:'ရွေးကြည်ကြိုး',
@@ -5096,7 +5099,7 @@ function renderAirstrikes() {
     const loc = item.loc;
     var icon = L.divIcon({
       className: '',
-      html: '<div class="airstrike-core">💥</div>',
+      html: '<div class="atlas-symbol event" style="color:#fa806c">'+atlasGlyph('event')+'</div>',
       iconSize: [22, 22], iconAnchor: [11, 11]
     });
     var marker = L.marker([loc.lat, loc.lng], { icon: icon, zIndexOffset: 800 });
@@ -5135,6 +5138,39 @@ function toggleCtrlPanel() {
   panel.style.display = isVisible ? 'none' : 'flex';
   expandBtn.style.display = isVisible ? 'flex' : 'none';
 }
+
+
+function regroupAtlasInventory() {
+  for (const [kind,group] of [['mines',mineLayerGroup],['bases',militaryLayerGroup]]) {
+    group.clearLayers(); group.addLayer(layerEvidenceGroups[kind]);
+    const buckets = new Map();
+    for (const [name,ref] of layerSiteMarkers[kind]) {
+      const ll=ref.marker.getLatLng(), p=map.project(ll,map.getZoom());
+      const key=map.getZoom()>=8 ? name : Math.floor(p.x/55)+':'+Math.floor(p.y/55);
+      if(!buckets.has(key)) buckets.set(key,[]);
+      buckets.get(key).push({name,marker:ref.marker,ll});
+    }
+    for(const entries of buckets.values()) {
+      if(entries.length===1){group.addLayer(entries[0].marker);continue;}
+      const center=[entries.reduce((n,e)=>n+e.ll.lat,0)/entries.length,entries.reduce((n,e)=>n+e.ll.lng,0)/entries.length];
+      const m=L.marker(center,{icon:atlasIcon(kind,entries.length),title:entries.length+' historical sites'});
+      atlasLabel(m,entries.length+' historical sites','Click to zoom');
+      m.on('click',()=>map.setView(center,Math.min(map.getZoom()+1.5,10)));
+      group.addLayer(m);
+    }
+  }
+}
+map.on('zoomend',regroupAtlasInventory);
+regroupAtlasInventory();
+
+const atlasButtons = {'btn-satellite':'satellite','btn-zones':'event','btn-jade':'mines','btn-scam':'scam','btn-roads':'roads','btn-military':'bases','btn-cities':'labels','btn-gt':'event','btn-airstrikes':'event'};
+for (const [id,kind] of Object.entries(atlasButtons)) {
+ const btn=document.getElementById(id);
+ for(const n of [...btn.childNodes]) if(n.nodeType===3) n.textContent=' ';
+ const glyph=document.createElement('span');glyph.className='layer-glyph';glyph.innerHTML=atlasGlyph(kind);btn.querySelector('.ctrl-dot').after(glyph);
+}
+
+if (window.innerWidth <= 760) toggleCtrlPanel();
 // Close layers menu when clicking outside
 document.addEventListener('click', function(e) {
   // noop — kept for future use
