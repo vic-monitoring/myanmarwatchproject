@@ -813,7 +813,30 @@ button:focus-visible,summary:focus-visible,a:focus-visible,input:focus-visible{o
 #btn-zones .layer-glyph,#btn-airstrikes .layer-glyph{color:#fa806c}#btn-scam .layer-glyph{color:#eab967}#btn-jade .layer-glyph{color:#65c4b4}#btn-military .layer-glyph{color:#82ace6}
 #ctrl-expand-btn{background:#141e27!important;color:#eaf0f5!important;border-radius:3px!important;font-size:12px!important}
 @media(max-width:760px){.feed-intro,#primary-source-status{display:none}.news-meta{margin-bottom:6px}.leaflet-control-attribution{font-size:8px!important}.map-ctrl-btn{min-height:28px}.hist-panel-header{padding:9px 18px}}
-</style></head>
+</style><style>
+/* Compact workspace: prioritize the map and put real news at the top. */
+:root{--header-h:52px}
+header{padding:0 18px;gap:18px}
+.logo-wordmark{font-size:21px;letter-spacing:-.5px}.brand-caption{display:none}
+.design-nav{gap:20px}.design-nav button{padding:16px 0;font-size:12px}
+.header-right{gap:7px}.tv-btn{font-size:11px;padding:7px}
+.main{height:calc(100dvh - var(--header-h));grid-template-columns:300px minmax(0,1fr)}
+.sidebar{min-width:0}.sidebar-header{padding:5px 14px;background:var(--bg)}.sidebar-header summary{padding:4px 0;font-size:11px}.sidebar-header[open]{background:var(--surface);padding-bottom:12px}
+.hist-panel-header{padding:10px 0}.hist-body{padding-left:0;padding-right:0}
+.feed-header{align-items:stretch}.feed-header>div:first-child{padding:6px 14px!important;min-height:31px}
+#source-breakdown{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px}
+.cat-tabs{display:flex;flex-wrap:wrap;gap:0;overflow:visible}.cat-tab{font-size:10px;padding:7px 8px;flex:1 0 auto;min-width:0}.time-tabs{padding:5px 12px}.time-tab{font-size:10px;padding:4px 8px}
+#primary-source-status{padding:6px 14px!important;font-size:10px!important;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.news-item{padding:13px 14px}.news-title{font-size:15px;line-height:1.4;letter-spacing:-.1px;margin-bottom:6px;-webkit-line-clamp:3}
+.news-meta{margin-bottom:6px}.news-meta span{font-size:10px!important}.news-excerpt{font-size:12px;line-height:1.5;margin:4px 0 7px;-webkit-line-clamp:2}.news-location,.news-location span{font-size:10px!important}
+.atlas-recenter{position:absolute;bottom:26px;left:14px;z-index:450;border:1px solid #46525d;background:#141e27;color:#eaf0f5;border-radius:3px;font:inherit;font-size:11px;padding:8px 12px;cursor:pointer}
+.map-controls{width:192px;top:12px;left:12px;padding:7px}.map-ctrl-btn{font-size:10px;padding:7px 6px;gap:7px}.layers-heading{padding:4px 6px 7px}.layer-glyph{width:15px;height:15px}
+@media(min-width:1600px){.main{grid-template-columns:320px minmax(0,1fr)}}
+@media(max-width:1100px) and (min-width:761px){.main{grid-template-columns:280px minmax(0,1fr)}.logo-wordmark{font-size:19px}.design-nav{gap:12px}.header-right{gap:2px}.tv-btn{padding:6px}.map-controls{width:182px}}
+@media(max-width:760px){:root{--header-h:48px}header{padding:0 12px;gap:8px}.logo-wordmark{font-size:19px}.main{height:calc(100dvh - var(--header-h));display:flex}.main>.sidebar{height:40%}.main>div:not(.sidebar){height:60%}.sidebar-header{padding:4px 12px}.cat-tab{font-size:11px;padding:6px 8px}.news-item{padding:12px 14px}.news-title{font-size:15px}.atlas-recenter{bottom:25px;left:8px;padding:7px 9px}.map-controls{width:165px}.map-ctrl-btn{padding:5px;font-size:10px;min-height:28px}}
+</style>
+<style>.sidebar> *{flex-shrink:0}.cat-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.cat-tab{padding:6px 2px;font-size:10px}.cat-tab:nth-child(4){grid-column:1 / 2}.cat-tab:nth-child(5){grid-column:2 / 4}.atlas-recenter:hover{border-color:var(--accent)}</style>
+</head>
 <body>
 
 <header>
@@ -822,7 +845,7 @@ button:focus-visible,summary:focus-visible,a:focus-visible,input:focus-visible{o
       <span class="logo-wordmark">Myanmar Watch</span><span class="brand-caption" data-i18n="design_brand">MONITORING & CARTOGRAPHY</span>
     </div>
   </div>
-  <nav class="design-nav" aria-label="Main navigation"><button onclick="recenterAtlas()" data-i18n="design_map">Map</button><button onclick="document.querySelector('.sidebar').scrollTo({top:0,behavior:'smooth'})" data-i18n="design_news">News</button><button onclick="toggleHistPanel();document.getElementById('hist-panel').scrollIntoView({block:'nearest'})" data-i18n="design_history">History</button></nav>
+  <nav class="design-nav" aria-label="Main navigation"><button onclick="recenterAtlas()" data-i18n="design_map">Map</button><button onclick="document.querySelector('.sidebar').scrollTo({top:0,behavior:'smooth'})" data-i18n="design_news">News</button><button onclick="document.getElementById('atlas-filters').open=true;toggleHistPanel();document.getElementById('hist-panel').scrollIntoView({block:'nearest'})" data-i18n="design_history">History</button></nav>
   <div class="header-right">
     <div class="hdr-stat"><div class="hdr-stat-label" data-i18n="stat_high">High</div><div class="hdr-stat-val hi" id="stat-high">—</div></div>
     <div class="hdr-stat"><div class="hdr-stat-label" data-i18n="stat_med">Med</div><div class="hdr-stat-val med" id="stat-med">—</div></div>
@@ -841,7 +864,7 @@ button:focus-visible,summary:focus-visible,a:focus-visible,input:focus-visible{o
     <button class="tv-btn" id="briefing-btn" onclick="toggleBriefingPanel()" style="border-color:rgba(100,200,255,0.3);">&#128203; <span data-i18n="btn_briefing">BRIEFING</span></button>
   </div>
 </header>
-<div class="atlas-toolbar"><span data-i18n="design_national">Myanmar · National view</span><div><button onclick="document.getElementById('atlas-filters').open = !document.getElementById('atlas-filters').open" data-i18n="design_filters">Filters</button><button onclick="recenterAtlas()" data-i18n="design_recenter">Recenter ↗</button></div></div>
+
 
 <div class="tv-panel" id="tv-panel">
   <div class="tv-panel-header"><span>📺 <span data-i18n="media_title">Myanmar Media — YouTube</span></span><span onclick="toggleTvPanel()" style="cursor:pointer;color:var(--text3);font-size:1.1rem;">×</span></div>
@@ -857,7 +880,6 @@ button:focus-visible,summary:focus-visible,a:focus-visible,input:focus-visible{o
 <div class="main">
   <!-- SIDEBAR -->
   <div class="sidebar">
-    <div class="feed-intro"><small data-i18n="design_feed">THE FEED</small><h1 data-i18n="design_heading">Myanmar, day by day.</h1><p data-i18n="design_source">Primary source · The Irrawaddy</p></div>
     <details class="sidebar-header" id="atlas-filters"><summary data-i18n="design_filters">Filters</summary>
       <div class="section-label" data-i18n="kw_filter">Keyword Filter</div>
       <div class="search-row">
@@ -870,7 +892,6 @@ button:focus-visible,summary:focus-visible,a:focus-visible,input:focus-visible{o
 
       </div>
       <div class="myanmar-label" id="myanmar-kw-display"></div>
-    </details>
 
     <!-- HISTORICAL EVENTS PANEL -->
     <div class="hist-panel" id="hist-panel">
@@ -1003,6 +1024,8 @@ button:focus-visible,summary:focus-visible,a:focus-visible,input:focus-visible{o
       </div>
     </div>
 
+    </details>
+
     <!-- FEED HEADER + TABS -->
     <div class="feed-header" style="flex-direction:column;padding:0;gap:0;">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px;border-bottom:0.5px solid var(--border);">
@@ -1041,6 +1064,7 @@ button:focus-visible,summary:focus-visible,a:focus-visible,input:focus-visible{o
   <div style="display:flex;flex-direction:column;overflow:hidden;flex:1;">
   <div class="map-area map-dark" id="map-area" style="flex:1;">
     <div id="map"></div>
+    <button class="atlas-recenter" onclick="recenterAtlas()" data-i18n="design_recenter">Recenter ↗</button>
 
     <!-- MAP CONTROLS -->
     <div class="map-controls" id="map-controls"><div class="layers-heading" data-i18n="design_layers">MAP LAYERS</div>
